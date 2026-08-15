@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: var(--font-display), "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+
+  /* The page swings hard between these grounds. Nothing in between. */
+  --color-ink: #0b0b0c;
+  --color-ink-soft: #101014;
+  --color-paper: #f1ede4;
+  --color-paper-cool: #e9edf1;
+  --color-paper-warm: #e8dfcb;
+  --color-indigo: #2323ee;
+  --color-navy: #0a1f44;
+  --color-forest: #04351f;
+  --color-eink: #16161a;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  background-color: var(--color-ink);
+}
+
+::selection {
+  background-color: #2323ee;
+  color: #ffffff;
+}
+
+/* Display type is Archivo pushed wide — the one consistent voice on the page. */
+.display {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 112;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.display-tight {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 100;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+/* Small caps-ish utility label. Inter, not a monospace — no dev-template texture. */
+.label {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
