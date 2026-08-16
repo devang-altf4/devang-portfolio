@@ -8,13 +8,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowUpRight } from "lucide-react";
 import type { BeatData, ProjectData } from "@/data/portfolio";
 import PhoneFrame from "@/components/motion/PhoneFrame";
+import PhraseBand from "@/components/motion/PhraseBand";
 import StepStack from "@/components/motion/StepStack";
 import {
   DUR,
   EASE,
   ENTER_START,
   STOP_UNIT,
-  frame,
   initGsap,
   liveLayer,
   splitWords,
@@ -32,6 +32,7 @@ import {
 export interface DeviceFocus {
   x: number;
   y: number;
+  /** Tightness of the focus frame. 1 = the whole screen, 2 = a quarter of it. */
   scale: number;
   look: string;
 }
@@ -52,7 +53,7 @@ export default function DeviceScene({
   focus,
 }: DeviceSceneProps) {
   const sectionRef = useRef<HTMLElement>(null);
-  const cameraRef = useRef<HTMLDivElement>(null);
+  const bandRef = useRef<HTMLDivElement>(null);
   const pushRef = useRef<HTMLDivElement>(null);
   const tiltRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
@@ -65,7 +66,6 @@ export default function DeviceScene({
 
   const [active, setActive] = useState(0);
 
-  const opening = focus[0];
   const moves = focus.slice(1);
   const copyLeft = side === "left";
   const isVideo = beat.asset.type === "video";
@@ -111,7 +111,14 @@ export default function DeviceScene({
         const marks = gsap.utils.toArray<HTMLElement>(stepsRef.current?.children ?? []);
 
         gsap.set(marks.slice(1), { yPercent: 110 });
-        gsap.set(cameraRef.current, frame(opening));
+
+        // Each phrase is split into masked words. Only the opening one rests
+        // in the band; the others wait below their own clip.
+        const phraseWords = gsap.utils
+          .toArray<HTMLElement>(bandRef.current?.children ?? [])
+          .map((el) => splitWords(el));
+        phraseWords.slice(1).forEach((w) => gsap.set(w, { yPercent: 110 }));
+        gsap.set(phraseWords[0], { yPercent: 0 });
 
         // ── Entrance, on approach. Readable before the section takes the screen.
         gsap
@@ -157,7 +164,7 @@ export default function DeviceScene({
             pin: true,
             scrub: 1.1,
             anticipatePin: 1,
-            onToggle: (self) => liveLayer(cameraRef.current, self.isActive),
+            onToggle: (self) => liveLayer(tiltRef.current, self.isActive),
           },
         });
 
@@ -166,15 +173,28 @@ export default function DeviceScene({
           .to(glowRef.current, { xPercent: copyLeft ? -10 : 10, ease: "none", duration: total }, 0)
           .call(() => setActive(0), [], 0);
 
-        moves.forEach((f, j) => {
+        moves.forEach((_f, j) => {
           const at = 0.3 + j * STOP_UNIT;
 
-          tl.fromTo(
-            cameraRef.current,
-            frame(focus[j]),
-            { ...frame(f), duration: 1.15, ease: EASE.camera, immediateRender: false },
-            at
-          ).call(() => setActive(j + 1), [], at);
+          if (phraseWords[j] && phraseWords[j + 1]) {
+            tl.to(
+              phraseWords[j],
+              { yPercent: -110, duration: 0.6, ease: EASE.soft, stagger: 0.035 },
+              at
+            ).fromTo(
+              phraseWords[j + 1],
+              { yPercent: 110 },
+              {
+                yPercent: 0,
+                duration: 0.7,
+                ease: EASE.enter,
+                stagger: 0.045,
+                immediateRender: false,
+              },
+              at + 0.12
+            );
+          }
+          tl.call(() => setActive(j + 1), [], at);
 
           if (marks[j] && marks[j + 1]) {
             tl.to(marks[j], { yPercent: -110, duration: 0.55, ease: EASE.soft }, at).fromTo(
@@ -188,7 +208,6 @@ export default function DeviceScene({
       });
 
       mm.add("(max-width: 1023px) and (prefers-reduced-motion: no-preference)", () => {
-        gsap.set(cameraRef.current, frame({ ...opening, scale: 1 }));
         settle();
 
         gsap
@@ -212,7 +231,6 @@ export default function DeviceScene({
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set(cameraRef.current, frame({ ...opening, scale: 1 }));
         settle();
       });
     },
@@ -237,15 +255,21 @@ export default function DeviceScene({
 
       <div className="flex flex-col lg:grid lg:h-full lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:px-[5vw]">
         <div
-          className={`order-2 flex justify-center py-10 lg:order-none lg:col-span-5 lg:row-start-1 lg:py-0 ${
+          className={`order-2 flex flex-col items-center justify-center gap-4 py-10 lg:order-none lg:col-span-5 lg:row-start-1 lg:py-0 ${
             copyLeft ? "lg:col-start-8" : "lg:col-start-1"
           }`}
           style={{ perspective: "1500px" }}
         >
+          <PhraseBand
+            phrases={focus.map((f) => f.look)}
+            bandRef={bandRef}
+            align={copyLeft ? "right" : "left"}
+          />
+
           <div ref={tiltRef} className="transform-gpu" style={{ transformStyle: "preserve-3d" }}>
             <PhoneFrame>
               <div ref={pushRef} className="absolute inset-0 transform-gpu">
-                <div ref={cameraRef} className="absolute inset-0 origin-center transform-gpu">
+                <div className="absolute inset-0">
                   {isVideo ? (
                     <video
                       ref={videoRef}
@@ -267,6 +291,13 @@ export default function DeviceScene({
                     />
                   )}
                 </div>
+
+                {/*
+                  The focus frame. Its outer shadow dims the rest of the screen,
+                  so one element both marks the region and darkens around it.
+                  The screenshot is never scaled — zooming a phone UI inside a
+                  fixed frame cropped its own labels mid-word.
+                */}
               </div>
             </PhoneFrame>
           </div>

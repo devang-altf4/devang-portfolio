@@ -77,9 +77,9 @@ export default function HeroScene() {
       </div>
 
       <div className="my-auto max-w-6xl">
-        <h1 ref={headlineRef} className="display-xl text-[clamp(3rem,10vw,8.5rem)] text-white">
+        <h1 ref={headlineRef} className="display-xl text-[clamp(2.75rem,8.4vw,7.5rem)] text-white">
           I build things that{" "}
-          <span className="display-narrow text-amethyst-soft">do things.</span>
+          <span className="display-soft text-amethyst-soft">do things.</span>
         </h1>
 
         <span

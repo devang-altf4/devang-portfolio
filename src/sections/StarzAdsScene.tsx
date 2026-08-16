@@ -10,7 +10,6 @@ export default function StarzAdsScene() {
     <ScreenScene
       project={project}
       beat={project.beats[5]}
-      mode="bleed"
       tone="base"
       side="left"
       focus={[

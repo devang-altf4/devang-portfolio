@@ -101,7 +101,7 @@ export default function ContactScene() {
 
       <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/60 sm:flex-row">
         <span>© {new Date().getFullYear()} Devang Gupta. All rights reserved.</span>
-        <span>Built with Next.js, TypeScript and GSAP.</span>
+        
       </div>
     </section>
   );

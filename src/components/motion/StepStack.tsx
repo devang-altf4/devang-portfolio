@@ -78,8 +78,11 @@ export default function StepStack({
               </p>
             </div>
 
-            <p className="mt-3 max-w-md text-[0.9375rem] leading-[1.55] text-white">{step.look}</p>
-            <p className="mt-2.5 max-w-md text-[0.8125rem] leading-[1.7] text-white/55">
+            {/* `look` is set large above the plate, so it is not repeated here. */}
+            <p className="mt-3 max-w-md text-[0.9375rem] leading-[1.65] text-white/75 lg:hidden">
+              {step.look}
+            </p>
+            <p className="mt-3 max-w-md text-[0.875rem] leading-[1.75] text-white/60">
               {step.body}
             </p>
           </div>

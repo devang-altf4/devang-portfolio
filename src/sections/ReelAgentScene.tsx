@@ -10,7 +10,6 @@ export default function ReelAgentScene() {
     <ScreenScene
       project={project}
       beat={project.beats[0]}
-      mode="bleed"
       tone="raised"
       side="right"
       focus={[

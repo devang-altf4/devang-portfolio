@@ -7,8 +7,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
  * 1. Entrances are time-based and fire while a section is still travelling up
  *    into view. They are never scrubbed from progress 0 of a pin — that leaves
  *    a pinned section sitting blank until the reader scrolls it open.
- * 2. Scrubbed timelines only move things that are already legible: the camera,
- *    parallax offsets, progress rules, caption swaps.
+ * 2. Scrubbed timelines only move things that are already legible: phrases,
+ *    parallax offsets, progress rules, step swaps. Nothing scales a
+ *    screenshot — see PhraseBand for why.
  */
 
 let registered = false;
@@ -98,23 +99,14 @@ export function splitWords(root: HTMLElement | null): HTMLElement[] {
   return inners;
 }
 
-/**
- * Centre an image-space point in the frame. GSAP writes `translate(...) scale(...)`,
- * so the translation happens in unscaled parent space — hence the `* scale` term.
- * The point is clamped so the camera can never pan past an edge.
- */
-export function frame(f: { x: number; y: number; scale: number }) {
-  const limit = 0.5 / f.scale;
-  const clamp = (v: number) => Math.min(Math.max(v, limit), 1 - limit);
-  return {
-    scale: f.scale,
-    xPercent: -(clamp(f.x) - 0.5) * 100 * f.scale,
-    yPercent: -(clamp(f.y) - 0.5) * 100 * f.scale,
-  };
-}
-
-/** Scrub seconds each camera stop owns: the push, then a beat to read it. */
+/** Scrub seconds each stop owns: the move, then a beat to read it. */
 export const STOP_UNIT = 1.7;
+
+/**
+ * `Focus.scale` is retained in the data as a hint of how tight a region a step
+ * is about, but nothing scales or crops the screenshot any more — the step's
+ * phrase says what to look at instead. See PhraseBand.
+ */
 
 /** Hex to an rgba() string, for building ground-aware gradients. */
 export function hexA(hex: string, alpha: number) {

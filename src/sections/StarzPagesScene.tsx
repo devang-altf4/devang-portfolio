@@ -10,7 +10,6 @@ export default function StarzPagesScene() {
     <ScreenScene
       project={project}
       beat={project.beats[4]}
-      mode="framed"
       tone="raised"
       side="right"
       focus={[

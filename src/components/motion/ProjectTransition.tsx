@@ -20,8 +20,13 @@ const OPENERS = [
 
 const PANELS = 7;
 const REST = "translateY(101%)";
-/** Sweep in, carry the card, sweep out. */
-const TOTAL_MS = 1400;
+/**
+ * Sweep in, hold the chapter card, sweep out. The first cut of this ran 1.4s
+ * with roughly a sixth of a second of presence, which read as a flicker rather
+ * than a chapter break — the whole point is that the reader registers moving
+ * from one project to the next.
+ */
+const TOTAL_MS = 2500;
 
 export default function ProjectTransition() {
   const [card, setCard] = useState({ number: "", title: "" });
@@ -62,23 +67,25 @@ export default function ProjectTransition() {
         createTimeline()
           .add(
             panels(),
-            { translateY: ["101%", "0%"], duration: 420, ease: "inOutExpo", delay: stagger(38) },
+            { translateY: ["101%", "0%"], duration: 560, ease: "inOutExpo", delay: stagger(46) },
             0
           )
+          // The hold. Long enough to read the project name, short enough that
+          // a fast scroll never feels blocked.
           .add(
             panels(),
-            { translateY: ["0%", "-101%"], duration: 500, ease: "inOutExpo", delay: stagger(38) },
-            700
+            { translateY: ["0%", "-101%"], duration: 640, ease: "inOutExpo", delay: stagger(46) },
+            1560
           );
 
         // The card is animated separately: it is rendered from state, so it
         // only exists in the DOM on the render after `setCard`.
         animate(cardRef.current!, {
           opacity: [0, 1, 1, 0],
-          translateY: [18, 0, 0, -10],
-          duration: 1000,
+          translateY: [26, 0, 0, -16],
+          duration: 1700,
           ease: "outExpo",
-          delay: 320,
+          delay: 420,
         });
       } catch (err) {
         console.error("[ProjectTransition] sweep failed; resetting", err);

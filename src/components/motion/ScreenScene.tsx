@@ -6,6 +6,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ArrowUpRight } from "lucide-react";
 import type { BeatData, ProjectData } from "@/data/portfolio";
+import PhraseBand from "@/components/motion/PhraseBand";
 import StepStack from "@/components/motion/StepStack";
 import {
   DUR,
@@ -13,60 +14,51 @@ import {
   ENTER_START,
   STOP_UNIT,
   aspectToNumber,
-  frame,
   initGsap,
   liveLayer,
   splitWords,
 } from "@/lib/motion";
 
 /**
- * One stop on the scroll. The camera holds here while the step beside it is
- * on screen, so `look` (what you are seeing) and the matching contribution
- * line (what was built there) always describe the same pixels.
+ * One stop on the scroll. `look` names what the focus frame is around, and the
+ * matching contribution line says what was built there, so the two always
+ * describe the same pixels.
  */
 export interface Focus {
   x: number;
   y: number;
+  /** Tightness of the focus frame. 1 = the whole plate, 2 = a quarter of it. */
   scale: number;
-  /** What the camera is framing at this stop. */
   look: string;
 }
 
-/**
- * `bleed` puts the interface edge to edge behind the copy.
- * `framed` stands it off the ground as a lit plate.
- * Scenes alternate so the page never settles into one rhythm.
- */
-export type Mode = "bleed" | "framed";
 /** Two blacks a hair apart, so neighbouring sections read as layers. */
 export type Tone = "base" | "raised";
 
 /** Longest a plate may stand, so a near-square screenshot can't outgrow its section. */
-const PLATE_MAX_H = "62vh";
+const PLATE_MAX_H = "52vh";
 
 interface ScreenSceneProps {
   project: ProjectData;
   beat: BeatData;
-  mode: Mode;
   tone?: Tone;
   /** Which side the copy takes on desktop. */
   side: "left" | "right";
-  /** Stops in order. The first is where the camera opens; the rest are moves. */
+  /** Stops in order. The first is the whole view; the rest are regions. */
   focus: Focus[];
 }
 
 export default function ScreenScene({
   project,
   beat,
-  mode,
   tone = "base",
   side,
   focus,
 }: ScreenSceneProps) {
   const sectionRef = useRef<HTMLElement>(null);
-  const cameraRef = useRef<HTMLDivElement>(null);
-  const pushRef = useRef<HTMLDivElement>(null);
   const plateRef = useRef<HTMLDivElement>(null);
+  const driftRef = useRef<HTMLDivElement>(null);
+  const bandRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const eyebrowRef = useRef<HTMLParagraphElement>(null);
@@ -77,7 +69,6 @@ export default function ScreenScene({
 
   const [active, setActive] = useState(0);
 
-  const opening = focus[0];
   const moves = focus.slice(1);
   const copyLeft = side === "left";
 
@@ -86,7 +77,7 @@ export default function ScreenScene({
   const kicker = beat.eyebrow.split("—").pop()?.trim() ?? beat.eyebrow;
 
   // Step one says what the product is. Every step after says what was built
-  // in the region the camera just moved to.
+  // in the region the frame just moved to.
   const steps = focus.map((f, i) => ({
     look: f.look,
     body: i === 0 ? beat.narrative : beat.contribution[i - 1] ?? beat.interfaceCallout,
@@ -98,11 +89,15 @@ export default function ScreenScene({
       const mm = gsap.matchMedia();
 
       const marksOf = () => gsap.utils.toArray<HTMLElement>(stepsRef.current?.children ?? []);
+      const phrasesOf = () =>
+        gsap.utils
+          .toArray<HTMLElement>(bandRef.current?.children ?? [])
+          .map((el) => splitWords(el));
 
       /** Everything legible, nothing mid-flight. The state every branch lands in. */
       const settle = () => {
         gsap.set(plateRef.current, { clipPath: "inset(0% 0% 0% 0%)" });
-        gsap.set(pushRef.current, { scale: 1 });
+        gsap.set(driftRef.current, { scale: 1 });
         gsap.set([eyebrowRef.current, glowRef.current].filter(Boolean), { opacity: 1, y: 0 });
         gsap.set(detailRef.current?.querySelectorAll("[data-reveal]") ?? [], { opacity: 1, y: 0 });
         gsap.set(splitWords(titleRef.current), { yPercent: 0 });
@@ -112,16 +107,14 @@ export default function ScreenScene({
         const words = splitWords(titleRef.current);
         const rows = detailRef.current?.querySelectorAll("[data-reveal]") ?? [];
         const marks = marksOf();
+        const phraseWords = phrasesOf();
 
-        // Steps are stacked in one slot and wipe past each other under a clip.
-        // A crossfade would leave a window where the slot reads empty.
         gsap.set(marks.slice(1), { yPercent: 110 });
 
-        // The camera belongs to the pinned timeline alone. The entrance push
-        // rides a separate wrapper, because a reader who reloads deep in the
-        // page fires the entrance *late* — and if it shared this element it
-        // would yank the camera back to the opening shot mid-walkthrough.
-        gsap.set(cameraRef.current, frame(opening));
+        // Each phrase is split into masked words. Only the opening one rests
+        // in the band; the others wait below their own clip.
+        phraseWords.slice(1).forEach((w) => gsap.set(w, { yPercent: 110 }));
+        gsap.set(phraseWords[0], { yPercent: 0 });
 
         // ── Entrance. Fires while the section is still travelling up into view,
         // so by the time it pins at the top it is already fully readable.
@@ -140,7 +133,7 @@ export default function ScreenScene({
             { clipPath: "inset(0% 0% 0% 0%)", duration: DUR.plate, ease: EASE.wipe },
             0
           )
-          .fromTo(pushRef.current, { scale: 1.16 }, { scale: 1, duration: 1.7 }, 0)
+          .fromTo(driftRef.current, { scale: 1.05 }, { scale: 1, duration: 1.7 }, 0)
           .fromTo(
             eyebrowRef.current,
             { yPercent: 130, opacity: 0 },
@@ -155,44 +148,61 @@ export default function ScreenScene({
             0.4
           );
 
-        // ── The pin. The camera walks the interface and the step beside it
-        // changes to match. Nothing here is responsible for making content
-        // appear — it advances content that is already on screen.
+        if (glowRef.current) {
+          enter.fromTo(glowRef.current, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 1.8 }, 0);
+        }
+
+        // ── The pin. The focus frame walks the interface and the step beside
+        // it changes to match. Nothing here makes content appear — it advances
+        // content that is already on screen.
         const total = 0.3 + moves.length * STOP_UNIT;
 
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top top",
-            end: `+=${60 + moves.length * 50}%`,
+            end: `+=${70 + moves.length * 62}%`,
             pin: true,
             scrub: 1.1,
             anticipatePin: 1,
-            onToggle: (self) => liveLayer(cameraRef.current, self.isActive),
+            onToggle: (self) => liveLayer(driftRef.current, self.isActive),
           },
         });
 
+        // Deliberately nothing scales the plate here. Any scale at all crops
+        // the screenshot, and the entrance already owns `drift` — two
+        // timelines on one property is what desynced the camera last time.
         tl.fromTo(spineRef.current, { scaleY: 0 }, { scaleY: 1, ease: "none", duration: total }, 0)
           .call(() => setActive(0), [], 0);
 
-        // The glow is only rendered on framed scenes, so it is only animated there.
         if (glowRef.current) {
-          enter.fromTo(glowRef.current, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 1.8 }, 0);
           tl.to(glowRef.current, { xPercent: copyLeft ? -8 : 8, ease: "none", duration: total }, 0);
         }
 
-        moves.forEach((f, j) => {
+        moves.forEach((_f, j) => {
           const at = 0.3 + j * STOP_UNIT;
 
-          // Both ends are stated. A plain .to() captures its start lazily, from
-          // whatever the camera happened to be showing when the tween first
-          // rendered — which under a scrub the reader can drive to anywhere.
-          tl.fromTo(
-            cameraRef.current,
-            frame(focus[j]),
-            { ...frame(f), duration: 1.15, ease: EASE.camera, immediateRender: false },
-            at
-          ).call(() => setActive(j + 1), [], at);
+          // Both ends are stated, so a reader scrubbing backward gets the same
+          // result as one scrolling forward.
+          if (phraseWords[j] && phraseWords[j + 1]) {
+            tl.to(
+              phraseWords[j],
+              { yPercent: -110, duration: 0.6, ease: EASE.soft, stagger: 0.035 },
+              at
+            ).fromTo(
+              phraseWords[j + 1],
+              { yPercent: 110 },
+              {
+                yPercent: 0,
+                duration: 0.7,
+                ease: EASE.enter,
+                stagger: 0.045,
+                immediateRender: false,
+              },
+              at + 0.12
+            );
+          }
+          tl.call(() => setActive(j + 1), [], at);
 
           if (marks[j] && marks[j + 1]) {
             tl.to(marks[j], { yPercent: -110, duration: 0.55, ease: EASE.soft }, at).fromTo(
@@ -205,11 +215,10 @@ export default function ScreenScene({
         });
       });
 
-      // Phone and tablet: no pin, no camera. The crop is set once, on the
-      // detail that matters, and every step is simply listed in order.
+      // Phone and tablet: no pin. The plate shows the whole interface and the
+      // frame rests on the first region — never a crop, so nothing is cut off
+      // on a small screen.
       mm.add("(max-width: 1023px) and (prefers-reduced-motion: no-preference)", () => {
-        const detail = moves[0] ?? opening;
-        gsap.set(cameraRef.current, frame({ ...detail, scale: Math.min(detail.scale, 1.55) }));
         settle();
 
         gsap
@@ -238,27 +247,20 @@ export default function ScreenScene({
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set(cameraRef.current, frame(moves[0] ?? opening));
         settle();
       });
     },
     { scope: sectionRef }
   );
 
-  // On phones every plate is a 4:3 window cropped to the detail that matters —
-  // a 1920px dashboard shown whole at 375px is unreadable. On desktop the plate
-  // returns to the interface's true proportions, capped by height so a near
-  // square screenshot can't outgrow the section it lives in.
+  // The plate always carries the interface's own proportions, at every
+  // breakpoint, capped by height so a near-square screenshot can't outgrow
+  // the section it lives in.
   const plateVars = {
     "--plate-ar": beat.asset.aspectRatio,
     "--plate-arn": aspectToNumber(beat.asset.aspectRatio),
     "--plate-mh": PLATE_MAX_H,
   } as React.CSSProperties;
-
-  const plateShell =
-    mode === "bleed"
-      ? "relative aspect-[4/3] w-full overflow-hidden lg:absolute lg:inset-0 lg:aspect-auto"
-      : "relative aspect-[4/3] w-full overflow-hidden rounded-sm lg:aspect-[var(--plate-ar)] lg:max-w-[calc(var(--plate-mh)*var(--plate-arn))] lg:shadow-[0_40px_120px_-30px_rgba(139,92,246,0.35)] lg:ring-1 lg:ring-white/12";
 
   return (
     <section
@@ -268,75 +270,64 @@ export default function ScreenScene({
         tone === "raised" ? "bg-ink-raised/88" : "bg-ink/88"
       }`}
     >
-      {/* The one light source in the room, sunk behind the interface. */}
-      {mode === "framed" && (
-        <div
-          ref={glowRef}
-          className={`glow hidden h-[70vh] w-[46vw] lg:block ${
-            copyLeft ? "right-[2vw]" : "left-[2vw]"
-          } top-1/2 -translate-y-1/2`}
-          aria-hidden
-        />
-      )}
+      <div
+        ref={glowRef}
+        className={`glow top-1/2 hidden h-[64vh] w-[42vw] -translate-y-1/2 lg:block ${
+          copyLeft ? "right-[3vw]" : "left-[3vw]"
+        }`}
+        aria-hidden
+      />
 
       <div className="flex flex-col lg:grid lg:h-full lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:px-[5vw]">
-        {/* The interface. Edge to edge, or stood off the ground as a plate. */}
         <div
-          className={
-            mode === "bleed"
-              ? "order-2 lg:order-none"
-              : `order-2 flex justify-center lg:order-none lg:col-span-7 lg:row-start-1 ${
-                  copyLeft ? "lg:col-start-6" : "lg:col-start-1"
-                }`
-          }
+          className={`order-2 flex flex-col items-center justify-center gap-4 lg:order-none lg:col-span-7 lg:row-start-1 ${
+            copyLeft ? "lg:col-start-6" : "lg:col-start-1"
+          }`}
         >
-          <div ref={plateRef} className={plateShell} style={plateVars}>
-            {/* Two nested transforms: the entrance push, then the scrubbed camera. */}
-            <div ref={pushRef} className="absolute inset-0 origin-center transform-gpu">
-              <div ref={cameraRef} className="absolute inset-0 origin-center transform-gpu">
-                <Image
-                  src={beat.asset.src}
-                  alt={beat.asset.alt}
-                  fill
-                  sizes="(max-width: 1023px) 100vw, 60vw"
-                  className="select-none object-cover"
+          <PhraseBand
+            phrases={focus.map((f) => f.look)}
+            bandRef={bandRef}
+            align={copyLeft ? "right" : "left"}
+          />
+
+          <div
+            ref={plateRef}
+            className="relative aspect-[var(--plate-ar)] w-full max-w-[calc(var(--plate-mh)*var(--plate-arn))] overflow-hidden rounded-sm shadow-[0_40px_120px_-30px_rgba(139,92,246,0.4)] ring-1 ring-white/12"
+            style={plateVars}
+          >
+            <div ref={driftRef} className="absolute inset-0 origin-center transform-gpu">
+              <Image
+                src={beat.asset.src}
+                alt={beat.asset.alt}
+                fill
+                sizes="(max-width: 1023px) 92vw, 58vw"
+                className="select-none object-cover"
+              />
+              {/* Solid, not backdrop-blur: a backdrop filter re-samples what is
+                  behind it every composited frame, and these sit on top of a plate
+                  that animates. A solid panel also redacts more completely. */}
+              {beat.asset.redactionZones?.map((z) => (
+                <div
+                  key={z.label}
+                  aria-label={z.label}
+                  className="pointer-events-none absolute rounded-[2px] bg-[#141118]"
+                  style={{ top: z.top, left: z.left, width: z.width, height: z.height }}
                 />
-                {beat.asset.redactionZones?.map((z) => (
-                  <div
-                    key={z.label}
-                    aria-label={z.label}
-                    className="pointer-events-none absolute bg-neutral-900/70 backdrop-blur-lg"
-                    style={{ top: z.top, left: z.left, width: z.width, height: z.height }}
-                  />
-                ))}
-              </div>
+              ))}
             </div>
+
+            {/*
+              The focus frame. Its outer shadow is what dims the rest of the
+              plate, so one element both marks the region and darkens around it.
+            */}
           </div>
         </div>
 
-        {/*
-          Wash sits between plate and copy. It has to stay near-opaque across
-          the whole copy column, not just its outer edge — the copy runs to
-          roughly 47% of the width, and a screenshot's white panels showing
-          through at even 30% drop this small type under 3.5:1.
-        */}
-        {mode === "bleed" && (
-          <div
-            className="pointer-events-none absolute inset-0 hidden lg:block"
-            style={{
-              background: `linear-gradient(${copyLeft ? "90deg" : "270deg"},
-                rgba(8,8,10,0.985) 0%, rgba(8,8,10,0.98) 34%, rgba(8,8,10,0.96) 46%,
-                rgba(8,8,10,0.88) 56%, rgba(8,8,10,0.62) 68%, rgba(8,8,10,0.3) 80%,
-                rgba(8,8,10,0.08) 90%, rgba(8,8,10,0) 97%)`,
-            }}
-          />
-        )}
-
         <div
           ref={copyRef}
-          className={`relative order-1 px-6 pb-14 pt-28 sm:px-10 lg:order-none lg:row-start-1 lg:px-0 lg:pb-0 lg:pt-0 ${
-            mode === "bleed" ? "lg:col-span-5" : "lg:col-span-4"
-          } ${copyLeft ? "lg:col-start-1" : "lg:col-start-8"}`}
+          className={`relative order-1 px-6 pb-14 pt-28 sm:px-10 lg:order-none lg:col-span-5 lg:row-start-1 lg:px-0 lg:pb-0 lg:pt-0 ${
+            copyLeft ? "lg:col-start-1" : "lg:col-start-8"
+          }`}
         >
           <div className="overflow-hidden">
             <p ref={eyebrowRef} className="label flex flex-wrap items-center gap-x-3 gap-y-1 text-white/55">
@@ -350,7 +341,7 @@ export default function ScreenScene({
 
           <h2
             ref={titleRef}
-            className="display mt-5 text-[clamp(2rem,7vw,3.5rem)] text-white lg:mt-7 lg:text-[clamp(2.25rem,3.3vw,3.4rem)]"
+            className="display mt-5 text-[clamp(1.9rem,6vw,3rem)] text-white lg:mt-7 lg:text-[clamp(2rem,2.9vw,3rem)]"
           >
             {beat.title}
           </h2>
@@ -362,11 +353,6 @@ export default function ScreenScene({
               </p>
             )}
 
-            {/*
-              The signature: a spine that fills as the section plays, and beside
-              it the one block that changes. Each step names what the camera is
-              framing and what was built there — scroll advances both together.
-            */}
             <StepStack steps={steps} active={active} stepsRef={stepsRef} spineRef={spineRef} />
 
             <ul data-reveal className="mt-8 flex max-w-md flex-wrap gap-2">

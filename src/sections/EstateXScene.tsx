@@ -10,7 +10,6 @@ export default function EstateXScene() {
     <ScreenScene
       project={project}
       beat={project.beats[0]}
-      mode="framed"
       tone="base"
       side="left"
       focus={[

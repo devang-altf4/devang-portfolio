@@ -10,7 +10,6 @@ export default function StarzChatsScene() {
     <ScreenScene
       project={project}
       beat={project.beats[3]}
-      mode="bleed"
       tone="base"
       side="left"
       focus={[

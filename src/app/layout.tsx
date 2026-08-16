@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Manrope } from "next/font/google";
+import { Sora, Inter } from "next/font/google";
 import SmoothScroll from "@/components/motion/SmoothScroll";
 import ScrollField from "@/components/motion/ScrollField";
 import ProjectTransition from "@/components/motion/ProjectTransition";
@@ -8,17 +8,18 @@ import Preloader from "@/components/ui/Preloader";
 import "./globals.css";
 
 /**
- * Bricolage Grotesque for display: a grotesque with actual quirks — flared
- * stems, a tight throat — so headlines read as chosen rather than defaulted.
- * Manrope underneath it is geometric and quiet, and stays out of the way.
+ * Sora for display: a geometric sans drawn for technical subjects, with heavy
+ * weights that stay clean at poster size instead of getting quirky. Inter
+ * underneath handles running copy and the small uppercase labels, where its
+ * tall x-height keeps 11px type legible.
  */
-const display = Bricolage_Grotesque({
+const display = Sora({
   subsets: ["latin"],
   variable: "--font-display",
-  axes: ["opsz", "wdth"],
+  weight: ["400", "600", "700", "800"],
 });
 
-const sans = Manrope({
+const sans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 });

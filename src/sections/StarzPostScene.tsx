@@ -10,7 +10,6 @@ export default function StarzPostScene() {
     <ScreenScene
       project={project}
       beat={project.beats[2]}
-      mode="bleed"
       tone="raised"
       side="right"
       focus={[

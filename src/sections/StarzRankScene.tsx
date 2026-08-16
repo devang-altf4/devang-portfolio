@@ -10,7 +10,6 @@ export default function StarzRankScene() {
     <ScreenScene
       project={project}
       beat={project.beats[1]}
-      mode="framed"
       tone="base"
       side="left"
       focus={[

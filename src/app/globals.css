@@ -43,48 +43,66 @@ body {
   color: #ffffff;
 }
 
-/* Ambient purple, sunk behind a plate. */
+/*
+ * Ambient purple, sunk behind a plate.
+ *
+ * A radial gradient, deliberately not `filter: blur()`. Blur cost scales with
+ * area times radius, and this element is ~550px square with a 90px radius —
+ * ten of them on the page, several animating inside a pinned section. A
+ * multi-stop gradient is already soft, paints in one pass, and needs no
+ * filter layer at all.
+ */
 .glow {
   position: absolute;
   border-radius: 9999px;
   pointer-events: none;
-  filter: blur(90px);
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.32) 0%, rgba(29, 11, 54, 0.18) 45%, transparent 70%);
+  will-change: opacity;
+  background: radial-gradient(
+    closest-side,
+    rgba(139, 92, 246, 0.26) 0%,
+    rgba(139, 92, 246, 0.17) 28%,
+    rgba(109, 40, 217, 0.09) 52%,
+    rgba(29, 11, 54, 0.04) 72%,
+    transparent 100%
+  );
 }
 
 /*
- * Bricolage Grotesque is a variable grotesque: `wdth` 75–100 and `opsz`
- * 12–96. Display type runs wide and optically sized for large settings;
- * the condensed clause in the hero drops to `wdth` 76 for contrast.
+ * Sora is geometric with wide, even counters, so display sizes want tighter
+ * tracking than a grotesque would — it opens up considerably as it scales.
+ * Optical tracking is stepped by size rather than left at one value.
  */
 .display {
   font-family: var(--font-display);
-  font-variation-settings: "wdth" 100, "opsz" 40;
   font-weight: 700;
-  letter-spacing: -0.028em;
-  line-height: 0.96;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
   text-wrap: balance;
 }
 
 .display-xl {
   font-family: var(--font-display);
-  font-variation-settings: "wdth" 100, "opsz" 96;
   font-weight: 800;
-  letter-spacing: -0.042em;
-  line-height: 0.92;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  text-wrap: balance;
 }
 
-.display-narrow {
-  font-variation-settings: "wdth" 76, "opsz" 96;
-  font-weight: 500;
+/* The quiet half of a two-tone headline: same face, lighter and receding. */
+.display-soft {
+  font-weight: 400;
+  letter-spacing: -0.03em;
 }
 
-/* Small caps-ish utility label. */
+/*
+ * Small caps-ish utility label. Inter at 600 rather than the display face —
+ * geometric caps at 11px with wide tracking lose their footing.
+ */
 .label {
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: 0.6875rem;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 
