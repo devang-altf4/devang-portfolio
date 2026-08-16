@@ -98,6 +98,24 @@ export function splitWords(root: HTMLElement | null): HTMLElement[] {
   return inners;
 }
 
+/**
+ * Centre an image-space point in the frame. GSAP writes `translate(...) scale(...)`,
+ * so the translation happens in unscaled parent space — hence the `* scale` term.
+ * The point is clamped so the camera can never pan past an edge.
+ */
+export function frame(f: { x: number; y: number; scale: number }) {
+  const limit = 0.5 / f.scale;
+  const clamp = (v: number) => Math.min(Math.max(v, limit), 1 - limit);
+  return {
+    scale: f.scale,
+    xPercent: -(clamp(f.x) - 0.5) * 100 * f.scale,
+    yPercent: -(clamp(f.y) - 0.5) * 100 * f.scale,
+  };
+}
+
+/** Scrub seconds each camera stop owns: the push, then a beat to read it. */
+export const STOP_UNIT = 1.7;
+
 /** Hex to an rgba() string, for building ground-aware gradients. */
 export function hexA(hex: string, alpha: number) {
   const n = parseInt(hex.slice(1), 16);

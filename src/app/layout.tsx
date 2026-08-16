@@ -1,16 +1,24 @@
 import type { Metadata } from "next";
-import { Archivo, Inter } from "next/font/google";
+import { Bricolage_Grotesque, Manrope } from "next/font/google";
 import SmoothScroll from "@/components/motion/SmoothScroll";
+import ScrollField from "@/components/motion/ScrollField";
+import ProjectTransition from "@/components/motion/ProjectTransition";
 import Navigation from "@/components/ui/Navigation";
+import Preloader from "@/components/ui/Preloader";
 import "./globals.css";
 
-const archivo = Archivo({
+/**
+ * Bricolage Grotesque for display: a grotesque with actual quirks — flared
+ * stems, a tight throat — so headlines read as chosen rather than defaulted.
+ * Manrope underneath it is geometric and quiet, and stays out of the way.
+ */
+const display = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-display",
-  axes: ["wdth"],
+  axes: ["opsz", "wdth"],
 });
 
-const inter = Inter({
+const sans = Manrope({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -35,10 +43,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${inter.variable}`}>
-      <body className="bg-ink text-paper antialiased">
+    <html lang="en" className={`${display.variable} ${sans.variable}`}>
+      <body className="bg-ink text-white antialiased">
+        <Preloader />
+        <ScrollField />
         <SmoothScroll>
           <Navigation />
+          <ProjectTransition />
           {children}
         </SmoothScroll>
       </body>

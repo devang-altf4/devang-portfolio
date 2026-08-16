@@ -1,16 +1,19 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ArrowUpRight } from "lucide-react";
 import type { BeatData, ProjectData } from "@/data/portfolio";
+import StepStack from "@/components/motion/StepStack";
 import {
   DUR,
   EASE,
   ENTER_START,
+  STOP_UNIT,
   aspectToNumber,
+  frame,
   initGsap,
   liveLayer,
   splitWords,
@@ -40,26 +43,6 @@ export type Tone = "base" | "raised";
 
 /** Longest a plate may stand, so a near-square screenshot can't outgrow its section. */
 const PLATE_MAX_H = "62vh";
-
-/** Scrub seconds each camera stop owns: the push, then a beat to read it. */
-const STOP_UNIT = 1.7;
-
-/**
- * Centre an image-space point in the frame. GSAP writes `translate(...) scale(...)`,
- * so the translation happens in unscaled parent space — hence the `* scale` term.
- * The point is clamped so the camera can never pan past an edge.
- */
-function frame(f: { x: number; y: number; scale: number }) {
-  const limit = 0.5 / f.scale;
-  const clamp = (v: number) => Math.min(Math.max(v, limit), 1 - limit);
-  return {
-    scale: f.scale,
-    xPercent: -(clamp(f.x) - 0.5) * 100 * f.scale,
-    yPercent: -(clamp(f.y) - 0.5) * 100 * f.scale,
-  };
-}
-
-const pad = (n: number) => String(n).padStart(2, "0");
 
 interface ScreenSceneProps {
   project: ProjectData;
@@ -92,6 +75,8 @@ export default function ScreenScene({
   const stepsRef = useRef<HTMLDivElement>(null);
   const spineRef = useRef<HTMLSpanElement>(null);
 
+  const [active, setActive] = useState(0);
+
   const opening = focus[0];
   const moves = focus.slice(1);
   const copyLeft = side === "left";
@@ -100,18 +85,25 @@ export default function ScreenScene({
   // What it doesn't carry is which product this is — that goes beside it.
   const kicker = beat.eyebrow.split("—").pop()?.trim() ?? beat.eyebrow;
 
+  // Step one says what the product is. Every step after says what was built
+  // in the region the camera just moved to.
+  const steps = focus.map((f, i) => ({
+    look: f.look,
+    body: i === 0 ? beat.narrative : beat.contribution[i - 1] ?? beat.interfaceCallout,
+  }));
+
   useGSAP(
     () => {
       initGsap();
       const mm = gsap.matchMedia();
 
-      const steps = () => gsap.utils.toArray<HTMLElement>(stepsRef.current?.children ?? []);
+      const marksOf = () => gsap.utils.toArray<HTMLElement>(stepsRef.current?.children ?? []);
 
       /** Everything legible, nothing mid-flight. The state every branch lands in. */
       const settle = () => {
         gsap.set(plateRef.current, { clipPath: "inset(0% 0% 0% 0%)" });
         gsap.set(pushRef.current, { scale: 1 });
-        gsap.set([eyebrowRef.current, glowRef.current], { opacity: 1, y: 0 });
+        gsap.set([eyebrowRef.current, glowRef.current].filter(Boolean), { opacity: 1, y: 0 });
         gsap.set(detailRef.current?.querySelectorAll("[data-reveal]") ?? [], { opacity: 1, y: 0 });
         gsap.set(splitWords(titleRef.current), { yPercent: 0 });
       };
@@ -119,7 +111,7 @@ export default function ScreenScene({
       mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
         const words = splitWords(titleRef.current);
         const rows = detailRef.current?.querySelectorAll("[data-reveal]") ?? [];
-        const marks = steps();
+        const marks = marksOf();
 
         // Steps are stacked in one slot and wipe past each other under a clip.
         // A crossfade would leave a window where the slot reads empty.
@@ -133,7 +125,7 @@ export default function ScreenScene({
 
         // ── Entrance. Fires while the section is still travelling up into view,
         // so by the time it pins at the top it is already fully readable.
-        gsap
+        const enter = gsap
           .timeline({
             scrollTrigger: {
               trigger: sectionRef.current,
@@ -149,7 +141,6 @@ export default function ScreenScene({
             0
           )
           .fromTo(pushRef.current, { scale: 1.16 }, { scale: 1, duration: 1.7 }, 0)
-          .fromTo(glowRef.current, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 1.8 }, 0)
           .fromTo(
             eyebrowRef.current,
             { yPercent: 130, opacity: 0 },
@@ -182,7 +173,13 @@ export default function ScreenScene({
         });
 
         tl.fromTo(spineRef.current, { scaleY: 0 }, { scaleY: 1, ease: "none", duration: total }, 0)
-          .to(glowRef.current, { xPercent: copyLeft ? -8 : 8, ease: "none", duration: total }, 0);
+          .call(() => setActive(0), [], 0);
+
+        // The glow is only rendered on framed scenes, so it is only animated there.
+        if (glowRef.current) {
+          enter.fromTo(glowRef.current, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 1.8 }, 0);
+          tl.to(glowRef.current, { xPercent: copyLeft ? -8 : 8, ease: "none", duration: total }, 0);
+        }
 
         moves.forEach((f, j) => {
           const at = 0.3 + j * STOP_UNIT;
@@ -195,7 +192,7 @@ export default function ScreenScene({
             frame(focus[j]),
             { ...frame(f), duration: 1.15, ease: EASE.camera, immediateRender: false },
             at
-          );
+          ).call(() => setActive(j + 1), [], at);
 
           if (marks[j] && marks[j + 1]) {
             tl.to(marks[j], { yPercent: -110, duration: 0.55, ease: EASE.soft }, at).fromTo(
@@ -268,7 +265,7 @@ export default function ScreenScene({
       ref={sectionRef}
       id={beat.id}
       className={`relative z-10 w-full overflow-hidden lg:h-screen ${
-        tone === "raised" ? "bg-ink-raised" : "bg-ink"
+        tone === "raised" ? "bg-ink-raised/88" : "bg-ink/88"
       }`}
     >
       {/* The one light source in the room, sunk behind the interface. */}
@@ -370,32 +367,7 @@ export default function ScreenScene({
               it the one block that changes. Each step names what the camera is
               framing and what was built there — scroll advances both together.
             */}
-            <div className="relative mt-9 pl-6">
-              <span className="absolute left-0 top-0 h-full w-px bg-white/12" aria-hidden>
-                <span
-                  ref={spineRef}
-                  className="block h-full w-px origin-top scale-y-0 bg-amethyst"
-                />
-              </span>
-
-              <div ref={stepsRef} data-reveal className="relative h-[12rem] overflow-hidden lg:h-[11rem]">
-                {focus.map((f, i) => (
-                  <div key={f.look} className="absolute inset-0">
-                    <p className="label tabular-nums text-amethyst-soft">
-                      {pad(i + 1)} / {pad(focus.length)}
-                    </p>
-                    <p className="mt-3 max-w-md text-[0.9375rem] leading-[1.55] text-white">
-                      {f.look}
-                    </p>
-                    {/* Step one says what the product is. Every step after says
-                        what was built in the region the camera just moved to. */}
-                    <p className="mt-2.5 max-w-md text-[0.8125rem] leading-[1.7] text-white/50">
-                      {i === 0 ? beat.narrative : beat.contribution[i - 1] ?? beat.interfaceCallout}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <StepStack steps={steps} active={active} stepsRef={stepsRef} spineRef={spineRef} />
 
             <ul data-reveal className="mt-8 flex max-w-md flex-wrap gap-2">
               {beat.techStack.map((tech) => (

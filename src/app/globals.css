@@ -43,7 +43,7 @@ body {
   color: #ffffff;
 }
 
-/* Ambient purple, sunk behind a plate. The only light source on the page. */
+/* Ambient purple, sunk behind a plate. */
 .glow {
   position: absolute;
   border-radius: 9999px;
@@ -52,27 +52,37 @@ body {
   background: radial-gradient(circle, rgba(139, 92, 246, 0.32) 0%, rgba(29, 11, 54, 0.18) 45%, transparent 70%);
 }
 
-/* Display type is Archivo pushed wide — the one consistent voice on the page. */
+/*
+ * Bricolage Grotesque is a variable grotesque: `wdth` 75–100 and `opsz`
+ * 12–96. Display type runs wide and optically sized for large settings;
+ * the condensed clause in the hero drops to `wdth` 76 for contrast.
+ */
 .display {
   font-family: var(--font-display);
-  font-variation-settings: "wdth" 112;
-  font-weight: 600;
-  letter-spacing: -0.022em;
-  line-height: 0.98;
+  font-variation-settings: "wdth" 100, "opsz" 40;
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 0.96;
   text-wrap: balance;
 }
 
-.display-tight {
+.display-xl {
   font-family: var(--font-display);
-  font-variation-settings: "wdth" 100;
-  font-weight: 600;
-  letter-spacing: -0.015em;
+  font-variation-settings: "wdth" 100, "opsz" 96;
+  font-weight: 800;
+  letter-spacing: -0.042em;
+  line-height: 0.92;
 }
 
-/* Small caps-ish utility label. Inter, not a monospace — no dev-template texture. */
+.display-narrow {
+  font-variation-settings: "wdth" 76, "opsz" 96;
+  font-weight: 500;
+}
+
+/* Small caps-ish utility label. */
 .label {
   font-family: var(--font-sans);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.6875rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -116,6 +126,14 @@ body {
 .pull-link:hover::after,
 .pull-link:focus-visible::after {
   transform: scaleX(1);
+}
+
+/* The WebGL field lies under every section, which is why grounds are translucent. */
+.scroll-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

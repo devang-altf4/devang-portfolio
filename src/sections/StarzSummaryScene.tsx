@@ -49,7 +49,7 @@ export default function StarzSummaryScene() {
     <section
       ref={sectionRef}
       id="starz-summary"
-      className="relative z-10 flex min-h-[70vh] w-full items-center justify-center overflow-hidden bg-ink px-6 py-24 sm:px-12 lg:px-24"
+      className="relative z-10 flex min-h-[70vh] w-full items-center justify-center overflow-hidden bg-ink/88 px-6 py-24 sm:px-12 lg:px-24"
     >
       <div ref={bodyRef} className="w-full max-w-4xl space-y-8 text-center">
         <div data-reveal className="label text-amethyst-soft">

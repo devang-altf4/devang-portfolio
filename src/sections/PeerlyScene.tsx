@@ -43,7 +43,13 @@ export default function PeerlyScene() {
         gsap.set(steps(), { opacity: 1 });
       };
 
-      mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
+      // This copy column runs ~670px and cannot shrink further, so the pin is
+      // gated on a viewport tall enough to hold it. A section that is pinned
+      // while overflowing puts its own call-to-action below the fold with no
+      // way to scroll to it.
+      mm.add(
+        "(min-width: 1024px) and (min-height: 800px) and (prefers-reduced-motion: no-preference)",
+        () => {
         const words = splitWords(titleRef.current);
         const rows = detailRef.current?.querySelectorAll("[data-reveal]") ?? [];
         const marks = steps();
@@ -98,23 +104,34 @@ export default function PeerlyScene() {
             1.5
           )
           .to(marks[2], { opacity: 1, duration: 0.3 }, 1.7);
-      });
+        }
+      );
 
-      mm.add("(max-width: 1023px) and (prefers-reduced-motion: no-preference)", () => {
-        settle();
-        gsap
-          .timeline({
-            scrollTrigger: { trigger: sectionRef.current, start: "top 82%" },
-            defaults: { ease: EASE.enter },
-          })
-          .fromTo(splitWords(titleRef.current), { yPercent: 118 }, { yPercent: 0, duration: 0.8, stagger: 0.035 }, 0)
-          .fromTo(
-            [dashboardRef.current, chatRef.current, paymentRef.current],
-            { opacity: 0, y: 30 },
-            { opacity: 1, y: 0, duration: 0.7, stagger: 0.12 },
-            0.15
-          );
-      });
+      // Narrow screens, and short ones where the pin was refused above: the
+      // three surfaces still arrive in sequence, they just do it in flow.
+      mm.add(
+        "(max-width: 1023px) and (prefers-reduced-motion: no-preference), (max-height: 799px) and (prefers-reduced-motion: no-preference)",
+        () => {
+          settle();
+          gsap
+            .timeline({
+              scrollTrigger: { trigger: sectionRef.current, start: "top 82%" },
+              defaults: { ease: EASE.enter },
+            })
+            .fromTo(
+              splitWords(titleRef.current),
+              { yPercent: 118 },
+              { yPercent: 0, duration: 0.8, stagger: 0.035 },
+              0
+            )
+            .fromTo(
+              [dashboardRef.current, chatRef.current, paymentRef.current],
+              { opacity: 0, y: 34 },
+              { opacity: 1, y: 0, duration: 0.8, stagger: 0.14 },
+              0.15
+            );
+        }
+      );
 
       mm.add("(prefers-reduced-motion: reduce)", settle);
     },
@@ -125,7 +142,7 @@ export default function PeerlyScene() {
     <section
       ref={sectionRef}
       id="peerly-main"
-      className="relative z-10 flex min-h-screen w-full items-center justify-center overflow-hidden bg-ink-raised px-6 py-24 sm:px-12 lg:px-24 lg:py-20"
+      className="relative z-10 flex min-h-screen w-full items-center justify-center overflow-hidden bg-ink-raised/88 px-6 py-24 sm:px-12 lg:px-24 lg:py-16"
     >
       <div className="grid w-full max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
         <div className="space-y-6 lg:col-span-5">
@@ -146,27 +163,26 @@ export default function PeerlyScene() {
               {beat.narrative}
             </p>
 
-            {/* The three surfaces below, named. Each lights as its card lands. */}
-            <ol data-reveal ref={stepsRef} className="space-y-2 border-t border-white/15 pt-4">
+            {/*
+              The three surfaces, each paired with what was built for it. These
+              were two separate lists saying the same thing twice, which pushed
+              the copy column past the height of the pin on a laptop screen.
+              Each entry lights as its card lands.
+            */}
+            <ol data-reveal ref={stepsRef} className="space-y-4 border-t border-white/15 pt-5">
               {STEPS.map((step, i) => (
-                <li key={step} className="label flex items-center gap-3 text-amethyst-soft">
-                  <span className="tabular-nums text-amethyst">0{i + 1}</span>
-                  <span className="h-px w-5 bg-amethyst/40" />
-                  {step}
+                <li key={step}>
+                  <div className="label flex items-center gap-3 text-amethyst-soft">
+                    <span className="tabular-nums text-amethyst-soft">0{i + 1}</span>
+                    <span className="h-px w-5 bg-amethyst/40" />
+                    {step}
+                  </div>
+                  <p className="mt-1.5 pl-11 text-xs leading-[1.6] text-white/60 sm:text-[0.8125rem]">
+                    {beat.contribution[i]}
+                  </p>
                 </li>
               ))}
             </ol>
-
-            <div data-reveal className="border-t border-white/15 pt-4">
-              <ul className="space-y-1.5">
-                {beat.contribution.map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-xs text-white/65 sm:text-sm">
-                    <span aria-hidden className="mt-0.5 text-xs text-amethyst">—</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
 
             <ul data-reveal className="flex flex-wrap gap-2">
               {project.techStack.map((tech) => (
@@ -198,10 +214,15 @@ export default function PeerlyScene() {
           </div>
         </div>
 
-        <div className="relative flex min-h-[400px] w-full flex-col items-center justify-center space-y-6 lg:col-span-7 lg:min-h-[560px] lg:space-y-0">
+        {/*
+          Height-driven on desktop: each card takes a share of a viewport-relative
+          container and derives its width from its aspect ratio, so the stack can
+          never outgrow the pin on a short laptop screen.
+        */}
+        <div className="relative flex min-h-[400px] w-full flex-col items-center justify-center space-y-6 lg:col-span-7 lg:h-[58vh] lg:min-h-0 lg:space-y-0">
           <div
             ref={dashboardRef}
-            className="relative aspect-[1920/1003] w-full overflow-hidden rounded-xl border border-white/15 bg-neutral-950 shadow-2xl"
+            className="relative aspect-[1920/1003] w-full overflow-hidden rounded-xl border border-white/15 bg-neutral-950 shadow-2xl lg:h-[46%] lg:w-auto lg:max-w-full"
           >
             <Image
               src="/assets/peerly-dashboard.jpg"
@@ -214,7 +235,7 @@ export default function PeerlyScene() {
 
           <div
             ref={chatRef}
-            className="relative z-20 aspect-[1920/948] w-full overflow-hidden rounded-xl border border-white/12 bg-neutral-950 shadow-2xl lg:-mt-24 lg:w-[85%]"
+            className="relative z-20 aspect-[1920/948] w-full overflow-hidden rounded-xl border border-white/12 bg-neutral-950 shadow-2xl lg:-mt-[7%] lg:h-[40%] lg:w-auto lg:max-w-full"
           >
             <Image
               src="/assets/peerly-chat.jpg"
@@ -227,7 +248,7 @@ export default function PeerlyScene() {
 
           <div
             ref={paymentRef}
-            className="relative z-30 aspect-[800/408] w-full max-w-[480px] overflow-hidden rounded-xl border border-amethyst/35 bg-neutral-950 shadow-2xl lg:-mt-20"
+            className="relative z-30 aspect-[800/408] w-full max-w-[480px] overflow-hidden rounded-xl border border-amethyst/35 bg-neutral-950 shadow-2xl lg:-mt-[6%] lg:h-[27%] lg:w-auto lg:max-w-full"
           >
             <Image
               src="/assets/peerly-payment.jpg"

@@ -49,7 +49,7 @@ export default function ContactScene() {
     <section
       ref={sectionRef}
       id="contact"
-      className="relative z-10 flex min-h-screen w-full flex-col justify-between overflow-hidden bg-ink px-6 py-24 sm:px-12 lg:px-24"
+      className="relative z-10 flex min-h-screen w-full flex-col justify-between overflow-hidden bg-ink/88 px-6 py-24 sm:px-12 lg:px-24"
     >
       <div className="label flex items-center gap-3 pt-8 text-white/55">
         <span>Get in touch</span>
