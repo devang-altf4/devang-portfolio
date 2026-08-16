@@ -57,15 +57,15 @@ export default function StarzSummaryScene() {
         </div>
 
         <h3 ref={titleRef} className="display text-3xl leading-tight text-white sm:text-5xl lg:text-6xl">
-          Five AI systems.{" "}
+          Three AI systems.{" "}
           <span className="mt-2 block text-2xl font-light italic text-amethyst-soft sm:text-4xl lg:text-5xl">
             One product ecosystem.
           </span>
         </h3>
 
         <p data-reveal className="mx-auto max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">
-          From autonomous local search auditing to real-time lead qualification and paused Meta ad
-          campaign creation — all unified in one full-stack architecture.
+          From Google Business Profile ranking to generated landing pages to automated WhatsApp and
+          review replies — all unified in one full-stack architecture.
         </p>
 
         {project.disclaimer && (

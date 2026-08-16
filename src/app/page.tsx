@@ -1,10 +1,8 @@
 import HeroScene from "@/sections/HeroScene";
 import StarzOverviewScene from "@/sections/StarzOverviewScene";
 import StarzRankScene from "@/sections/StarzRankScene";
-import StarzPostScene from "@/sections/StarzPostScene";
 import StarzChatsScene from "@/sections/StarzChatsScene";
 import StarzPagesScene from "@/sections/StarzPagesScene";
-import StarzAdsScene from "@/sections/StarzAdsScene";
 import StarzSummaryScene from "@/sections/StarzSummaryScene";
 import ReadoraScene from "@/sections/ReadoraScene";
 import CallingAgentScene from "@/sections/CallingAgentScene";
@@ -16,7 +14,7 @@ import AboutScene from "@/sections/AboutScene";
 import ContactScene from "@/sections/ContactScene";
 
 /**
- * Scroll order is the argument: the flagship suite opens, walks through its five
+ * Scroll order is the argument: the flagship suite opens, walks through its three
  * agents, closes on a summary, then the standalone builds follow by scale.
  */
 export default function PortfolioPage() {
@@ -25,10 +23,8 @@ export default function PortfolioPage() {
       <HeroScene />
       <StarzOverviewScene />
       <StarzRankScene />
-      <StarzPostScene />
-      <StarzChatsScene />
       <StarzPagesScene />
-      <StarzAdsScene />
+      <StarzChatsScene />
       <StarzSummaryScene />
       <ReadoraScene />
       <CallingAgentScene />

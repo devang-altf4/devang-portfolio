@@ -12,6 +12,9 @@ import {
   DUR,
   EASE,
   ENTER_START,
+  NO_PIN_SHORT,
+  PIN_DESKTOP,
+  PIN_MOBILE,
   STOP_UNIT,
   aspectToNumber,
   initGsap,
@@ -103,7 +106,7 @@ export default function ScreenScene({
         gsap.set(splitWords(titleRef.current), { yPercent: 0 });
       };
 
-      mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
+      mm.add(PIN_DESKTOP, () => {
         const words = splitWords(titleRef.current);
         const rows = detailRef.current?.querySelectorAll("[data-reveal]") ?? [];
         const marks = marksOf();
@@ -215,15 +218,23 @@ export default function ScreenScene({
         });
       });
 
-      // Phone and tablet: no pin. The plate shows the whole interface and the
-      // frame rests on the first region — never a crop, so nothing is cut off
-      // on a small screen.
-      mm.add("(max-width: 1023px) and (prefers-reduced-motion: no-preference)", () => {
+      /*
+       * Phones pin too, so scrolling changes the text there exactly as it does
+       * on a desktop. The one difference is the phrase band, which is
+       * desktop-only — on a phone the step block carries its own `look` line.
+       */
+      mm.add(PIN_MOBILE, () => {
+        const marks = marksOf();
+        gsap.set(marks.slice(1), { yPercent: 110 });
         settle();
 
         gsap
           .timeline({
-            scrollTrigger: { trigger: sectionRef.current, start: "top 82%" },
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: ENTER_START,
+              toggleActions: "play none none reverse",
+            },
             defaults: { ease: EASE.enter },
           })
           .fromTo(
@@ -243,6 +254,56 @@ export default function ScreenScene({
             { y: 16, opacity: 0 },
             { y: 0, opacity: 1, duration: 0.6, stagger: 0.05, ease: EASE.soft },
             0.25
+          );
+
+        const total = 0.3 + moves.length * STOP_UNIT;
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top top",
+            end: "+=" + (60 + moves.length * 55) + "%",
+            pin: true,
+            scrub: 1.1,
+            anticipatePin: 1,
+          },
+        });
+
+        tl.fromTo(spineRef.current, { scaleY: 0 }, { scaleY: 1, ease: "none", duration: total }, 0)
+          .call(() => setActive(0), [], 0);
+
+        moves.forEach((_f, j) => {
+          const at = 0.3 + j * STOP_UNIT;
+          tl.call(() => setActive(j + 1), [], at);
+          if (marks[j] && marks[j + 1]) {
+            tl.to(marks[j], { yPercent: -110, duration: 0.55, ease: EASE.soft }, at).fromTo(
+              marks[j + 1],
+              { yPercent: 110 },
+              { yPercent: 0, duration: 0.55, ease: EASE.soft, immediateRender: false },
+              at
+            );
+          }
+        });
+      });
+
+      // Too short to hold a pinned section. The steps are listed instead.
+      mm.add(NO_PIN_SHORT, () => {
+        settle();
+        gsap
+          .timeline({
+            scrollTrigger: { trigger: sectionRef.current, start: "top 82%" },
+            defaults: { ease: EASE.enter },
+          })
+          .fromTo(
+            plateRef.current,
+            { clipPath: "inset(0% 0% 100% 0%)" },
+            { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9, ease: EASE.wipe },
+            0
+          )
+          .fromTo(
+            splitWords(titleRef.current),
+            { yPercent: 118 },
+            { yPercent: 0, duration: 0.8, stagger: 0.035 },
+            0.1
           );
       });
 
@@ -266,7 +327,7 @@ export default function ScreenScene({
     <section
       ref={sectionRef}
       id={beat.id}
-      className={`relative z-10 w-full overflow-hidden lg:h-screen ${
+      className={`relative z-10 min-h-[100svh] w-full overflow-hidden lg:h-screen lg:min-h-0 ${
         tone === "raised" ? "bg-ink-raised/88" : "bg-ink/88"
       }`}
     >
@@ -278,9 +339,9 @@ export default function ScreenScene({
         aria-hidden
       />
 
-      <div className="flex flex-col lg:grid lg:h-full lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:px-[5vw]">
+      <div className="flex min-h-[100svh] flex-col justify-center gap-6 px-6 pb-10 pt-20 sm:px-10 lg:grid lg:h-full lg:min-h-0 lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:px-[5vw] lg:pb-0 lg:pt-0">
         <div
-          className={`order-2 flex flex-col items-center justify-center gap-4 lg:order-none lg:col-span-7 lg:row-start-1 ${
+          className={`order-1 flex flex-col items-center justify-center gap-4 lg:order-none lg:col-span-7 lg:row-start-1 ${
             copyLeft ? "lg:col-start-6" : "lg:col-start-1"
           }`}
         >
@@ -292,7 +353,7 @@ export default function ScreenScene({
 
           <div
             ref={plateRef}
-            className="relative aspect-[var(--plate-ar)] w-full max-w-[calc(var(--plate-mh)*var(--plate-arn))] overflow-hidden rounded-sm shadow-[0_40px_120px_-30px_rgba(139,92,246,0.4)] ring-1 ring-white/12"
+            className="relative aspect-[var(--plate-ar)] w-full max-w-[calc(28svh*var(--plate-arn))] overflow-hidden rounded-sm shadow-[0_40px_120px_-30px_rgba(139,92,246,0.4)] ring-1 ring-white/12 lg:max-w-[calc(var(--plate-mh)*var(--plate-arn))]"
             style={plateVars}
           >
             <div ref={driftRef} className="absolute inset-0 origin-center transform-gpu">
@@ -325,7 +386,7 @@ export default function ScreenScene({
 
         <div
           ref={copyRef}
-          className={`relative order-1 px-6 pb-14 pt-28 sm:px-10 lg:order-none lg:col-span-5 lg:row-start-1 lg:px-0 lg:pb-0 lg:pt-0 ${
+          className={`relative order-2 lg:order-none lg:col-span-5 lg:row-start-1 ${
             copyLeft ? "lg:col-start-1" : "lg:col-start-8"
           }`}
         >
@@ -341,21 +402,21 @@ export default function ScreenScene({
 
           <h2
             ref={titleRef}
-            className="display mt-5 text-[clamp(1.9rem,6vw,3rem)] text-white lg:mt-7 lg:text-[clamp(2rem,2.9vw,3rem)]"
+            className="display text-[clamp(1.6rem,5.4vw,2.4rem)] text-white lg:mt-7 lg:text-[clamp(2rem,2.9vw,3rem)]"
           >
             {beat.title}
           </h2>
 
-          <div ref={detailRef} className="mt-5 lg:mt-6">
+          <div ref={detailRef} className="mt-4 lg:mt-6">
             {beat.subtitleItalic && (
-              <p data-reveal className="max-w-md text-[0.9375rem] leading-[1.6] text-white/60">
+              <p data-reveal className="hidden max-w-md text-[0.9375rem] leading-[1.6] text-white/60 lg:block">
                 {beat.subtitleItalic}
               </p>
             )}
 
             <StepStack steps={steps} active={active} stepsRef={stepsRef} spineRef={spineRef} />
 
-            <ul data-reveal className="mt-8 flex max-w-md flex-wrap gap-2">
+            <ul data-reveal className="mt-6 flex max-w-md flex-nowrap gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mt-8 lg:flex-wrap lg:overflow-visible">
               {beat.techStack.map((tech) => (
                 <li
                   key={tech}
@@ -367,14 +428,14 @@ export default function ScreenScene({
             </ul>
 
             {beat.links.length > 0 && (
-              <div data-reveal className="mt-7 flex flex-wrap gap-3">
+              <div data-reveal className="mt-5 flex flex-nowrap gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mt-7 lg:flex-wrap lg:overflow-visible">
                 {beat.links.map((link) => (
                   <a
                     key={link.url}
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="label inline-flex items-center gap-2 rounded-full border border-amethyst/50 px-6 py-3 text-amethyst-soft transition-colors hover:bg-amethyst hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
+                    className="label inline-flex shrink-0 items-center gap-2 rounded-full border border-amethyst/50 px-5 py-2.5 text-amethyst-soft lg:px-6 lg:py-3 transition-colors hover:bg-amethyst hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
                   >
                     {link.label}
                     <ArrowUpRight className="h-3.5 w-3.5" />

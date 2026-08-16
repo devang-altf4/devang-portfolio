@@ -8,10 +8,8 @@ import { initGsap } from "@/lib/motion";
 const SECTIONS = [
   { id: "starz-overview", counter: "01" },
   { id: "starz-rank", counter: "01.1" },
-  { id: "starz-post", counter: "01.2" },
+  { id: "starz-pages", counter: "01.2" },
   { id: "starz-chats", counter: "01.3" },
-  { id: "starz-pages", counter: "01.4" },
-  { id: "starz-ads", counter: "01.5" },
   { id: "starz-summary", counter: "01" },
   { id: "readora-main", counter: "02" },
   { id: "calling-main", counter: "03" },
@@ -80,6 +78,17 @@ export default function Navigation() {
         className="pointer-events-none fixed inset-x-0 top-0 z-50 h-px origin-left bg-amethyst"
         ref={barRef}
         style={{ transform: "scaleX(0)" }}
+        aria-hidden
+      />
+
+      {/*
+        A scrim, not a blur. The bar is fixed and content scrolls under it —
+        on a phone the section eyebrow ran straight through the wordmark. A
+        gradient costs one paint pass; `backdrop-filter` would re-sample the
+        page behind it on every composited frame.
+      */}
+      <div
+        className="pointer-events-none fixed inset-x-0 top-0 z-40 h-24 bg-gradient-to-b from-ink via-ink/85 to-transparent lg:h-28"
         aria-hidden
       />
 

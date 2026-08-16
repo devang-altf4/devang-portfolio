@@ -13,10 +13,10 @@ export default function StarzChatsScene() {
       tone="base"
       side="left"
       focus={[
-        { x: 0.5, y: 0.5, scale: 1.06, look: "The conversational agent console, whole" },
-        { x: 0.5, y: 0.56, scale: 1.85, look: "A live inbound thread, answered as it streams" },
+        { x: 0.5, y: 0.5, scale: 1.06, look: "The conversation console, whole" },
+        { x: 0.5, y: 0.56, scale: 1.85, look: "Inbound WhatsApp, answered as it streams" },
+        { x: 0.2, y: 0.5, scale: 1.7, look: "Review and comment replies posted back to Google" },
         { x: 0.84, y: 0.42, scale: 1.9, look: "Lead qualification, scored 85 out of 100" },
-        { x: 0.2, y: 0.5, scale: 1.7, look: "Threads syncing back to the CRM" },
       ]}
     />
   );

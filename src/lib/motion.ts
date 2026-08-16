@@ -41,6 +41,25 @@ export const DUR = {
 /** Where a section starts revealing itself, measured against the viewport. */
 export const ENTER_START = "top 78%";
 
+/**
+ * Media queries for the two ways a section can behave. They are declared once
+ * because three places must agree: the GSAP branch that walks the steps, the
+ * GSAP branch that doesn't, and the React layout that decides whether the step
+ * blocks are stacked in one slot or listed in flow. If those disagree, steps
+ * either pile on top of each other or never move.
+ *
+ * Phones pin too — the scroll should change the text there exactly as it does
+ * on a desktop — but only when the viewport is tall enough to hold a pinned
+ * section. Below that the section scrolls normally and lists its steps.
+ */
+export const PIN_DESKTOP = "(min-width: 1024px) and (prefers-reduced-motion: no-preference)";
+export const PIN_MOBILE =
+  "(max-width: 1023px) and (min-height: 640px) and (prefers-reduced-motion: no-preference)";
+export const NO_PIN_SHORT =
+  "(max-width: 1023px) and (max-height: 639px) and (prefers-reduced-motion: no-preference)";
+/** Matches whenever either pinned branch is live. */
+export const STACKED_STEPS = "(min-width: 1024px), (min-height: 640px)";
+
 const WORD = "reveal-word";
 const INNER = "reveal-word-i";
 

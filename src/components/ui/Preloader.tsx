@@ -12,7 +12,7 @@ import { markPageReady } from "@/lib/ready";
 const CRITICAL = [
   "/assets/starz-app-overview.jpg",
   "/assets/starz-ai-rank.png",
-  "/assets/starz-ai-post.png",
+  "/assets/starz-ai-pages.png",
 ];
 
 /** The manifest that counts itself in while the assets land. */
@@ -179,16 +179,17 @@ export default function Preloader() {
         ))}
       </div>
 
+      {/* The meta line stays pinned to the top; everything that moves is centred. */}
+      <div className="label absolute inset-x-0 top-0 flex items-center justify-between px-6 py-10 text-white/55 sm:px-12 sm:py-14 lg:px-20">
+        <span>Devang Gupta — Software Engineer</span>
+        <span className="hidden sm:block">Selected works</span>
+      </div>
+
       <div
         ref={bodyRef}
-        className="absolute inset-0 flex flex-col justify-between px-6 py-10 sm:px-12 sm:py-14 lg:px-20"
+        className="absolute inset-0 flex flex-col justify-center px-6 sm:px-12 lg:px-20"
       >
-        <div className="label flex items-center justify-between text-white/55">
-          <span>Devang Gupta — Software Engineer</span>
-          <span className="hidden sm:block">Selected works</span>
-        </div>
-
-        <div className="flex flex-col gap-10">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
           {/*
             The mask height is in rem, not em. `em` resolved against this
             container's own inherited 16px rather than the display type inside

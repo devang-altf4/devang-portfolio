@@ -1,19 +1,25 @@
 "use client";
 
-import type { RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import { motion } from "framer-motion";
+import { STACKED_STEPS } from "@/lib/motion";
 
 /**
- * The block that changes while a section is pinned. Steps are stacked in one
- * slot and wipe past each other under a clip — a crossfade would leave a
- * window where the slot reads empty. GSAP drives the wipe; `active` only
- * drives the icon, which is Framer Motion's.
+ * The block that changes while a section is pinned.
+ *
+ * Two layouts, and the difference matters. Wherever the section pins — desktop
+ * and any phone tall enough — the steps are stacked in one slot and wipe past
+ * each other as the scroll advances. Where it cannot pin (very short
+ * viewports) nothing would drive them, and stacked blocks with nothing to
+ * offset them all render on top of one another, so those fall back to a list.
+ *
+ * `STACKED_STEPS` is the single source of truth shared with the GSAP branches.
  */
 
 export interface Step {
-  /** What the camera is framing here. */
+  /** What the scene is showing here. Set large above the plate on desktop. */
   look: string;
-  /** What was built in that region. Step one carries the narrative instead. */
+  /** What was built there. Step one carries the narrative instead. */
   body: string;
 }
 
@@ -31,6 +37,21 @@ const GLYPHS = [
   "M5 8h5v4H5z M14 12h5v4h-5z M10 10h4 M12 10v4",
 ];
 
+/** Only the pinned layout has an "active" step; the list shows them all. */
+function useStacked() {
+  // Defaults to stacked, which is what almost every viewport resolves to —
+  // the correction below only fires on genuinely short screens.
+  const [stacked, setStacked] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia(STACKED_STEPS);
+    const sync = () => setStacked(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  return stacked;
+}
+
 export default function StepStack({
   steps,
   active,
@@ -42,15 +63,25 @@ export default function StepStack({
   stepsRef: RefObject<HTMLDivElement | null>;
   spineRef: RefObject<HTMLSpanElement | null>;
 }) {
+  const stacked = useStacked();
+
   return (
-    <div className="relative mt-9 pl-6">
+    <div className="relative mt-6 pl-5 sm:mt-8 sm:pl-6">
       <span className="absolute left-0 top-0 h-full w-px bg-white/12" aria-hidden>
         <span ref={spineRef} className="block h-full w-px origin-top scale-y-0 bg-amethyst" />
       </span>
 
-      <div ref={stepsRef} data-reveal className="relative h-[13rem] overflow-hidden lg:h-[12rem]">
+      <div
+        ref={stepsRef}
+        data-reveal
+        className={
+          stacked
+            ? "relative h-[9.5rem] overflow-hidden sm:h-[11rem] lg:h-[12rem]"
+            : "relative space-y-7"
+        }
+      >
         {steps.map((step, i) => (
-          <div key={step.look} className="absolute inset-0">
+          <div key={step.look} className={stacked ? "absolute inset-0" : ""}>
             <div className="flex items-center gap-3">
               <motion.svg
                 viewBox="0 0 24 24"
@@ -66,9 +97,9 @@ export default function StepStack({
                   d={GLYPHS[i % GLYPHS.length]}
                   initial={false}
                   animate={
-                    active === i
-                      ? { pathLength: 1, opacity: 1 }
-                      : { pathLength: 0.15, opacity: 0.45 }
+                    stacked && active !== i
+                      ? { pathLength: 0.15, opacity: 0.45 }
+                      : { pathLength: 1, opacity: 1 }
                   }
                   transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
                 />
@@ -78,11 +109,10 @@ export default function StepStack({
               </p>
             </div>
 
-            {/* `look` is set large above the plate, so it is not repeated here. */}
-            <p className="mt-3 max-w-md text-[0.9375rem] leading-[1.65] text-white/75 lg:hidden">
-              {step.look}
-            </p>
-            <p className="mt-3 max-w-md text-[0.875rem] leading-[1.75] text-white/60">
+            {/* `look` is set large above the plate on desktop, so it is only
+                printed here on the narrow layout where that band is hidden. */}
+            <p className="mt-3 text-[0.9375rem] leading-[1.55] text-white lg:hidden">{step.look}</p>
+            <p className="mt-2 max-w-md text-[0.8125rem] leading-[1.7] text-white/60 sm:text-[0.875rem] sm:leading-[1.75]">
               {step.body}
             </p>
           </div>

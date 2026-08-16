@@ -96,7 +96,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
       projectNumber: "01 / 06",
       title: "STARZ AI Engine",
       subtitleItalic: "Multi-agent autonomous growth platform.",
-      tagline: "A suite of coordinated AI agents automating local search optimization, content creation, conversational qualification, and paid advertising.",
+      tagline: "Three coordinated AI agents automating Google Business Profile ranking, landing page generation, and customer conversation.",
       role: "Full-Stack & Systems Engineer",
       techStack: ["Next.js", "Python", "FastAPI", "Meta Graph API", "Tailwind CSS"],
       disclaimer: "Built as part of Starz Ventures. All rights reserved by the company.",
@@ -106,8 +106,8 @@ export const PORTFOLIO_DATA: PortfolioData = {
           beatIndex: "01.0",
           eyebrow: "01 / 06 — FLAGSHIP SUITE",
           title: "The Agent Architecture",
-          subtitleItalic: "Five autonomous systems in one product suite.",
-          narrative: "Engineered a synchronized ecosystem of AI agents that independently manage business growth operations from a single unified interface.",
+          subtitleItalic: "Three autonomous systems in one product suite.",
+          narrative: "Engineered a synchronized ecosystem of AI agents that independently manage local search ranking, web presence, and customer conversation from a single unified interface.",
           contribution: [
             "Architected multi-agent orchestration layer",
             "Built responsive mobile and web dashboard client",
@@ -132,10 +132,10 @@ export const PORTFOLIO_DATA: PortfolioData = {
           beatIndex: "01.1",
           eyebrow: "01.1 / STARZ — LOCAL SEARCH AGENT",
           title: "AI Rank Optimization",
-          subtitleItalic: "Algorithmic local search auditing and keyword intelligence.",
-          narrative: "Audits Google Business Profile metrics, tracks local search visibility scores, and generates targeted location keyword optimizations.",
+          subtitleItalic: "Google Business Profile SEO and local ranking intelligence.",
+          narrative: "Audits Google Business Profile health, tracks local search visibility, and generates the keyword and content changes that move a listing up the local pack.",
           contribution: [
-            "Implemented DIBIL score radar calculation view",
+            "Implemented DIBIL profile health score and audit view",
             "Built geo-ranking keyword audit and competitor grid",
             "Integrated map and action telemetry metrics"
           ],
@@ -153,67 +153,14 @@ export const PORTFOLIO_DATA: PortfolioData = {
           ]
         },
         {
-          id: "starz-post",
-          beatIndex: "01.2",
-          eyebrow: "01.2 / STARZ — CREATIVE AGENT",
-          title: "AI Social Post Engine",
-          subtitleItalic: "Multi-variant creative generation and scheduling.",
-          narrative: "Generates synchronized multi-variant social creatives with custom captions and schedules publication across social channels.",
-          contribution: [
-            "Built 4-variant creative generation grid",
-            "Integrated direct scheduling with Meta Graph APIs",
-            "Constructed real-time post preview canvas"
-          ],
-          interfaceCallout: "Interface shows batch generation of 4 social post variants.",
-          techStack: ["React", "FastAPI", "Meta APIs"],
-          asset: {
-            src: "/assets/starz-ai-post.png",
-            alt: "STARZ AI Social Post Generator",
-            type: "image",
-            aspectRatio: "1920/1030"
-          },
-          stageColor: "#100d20",
-          links: [
-            { label: "CRM Portal", url: "https://crm.starz.vip", type: "live" }
-          ]
-        },
-        {
-          id: "starz-chats",
-          beatIndex: "01.3",
-          eyebrow: "01.3 / STARZ — CONVERSATIONAL AGENT",
-          title: "AI Chat & Lead Scoring",
-          subtitleItalic: "Automated dialogue and qualification scoring.",
-          narrative: "Handles inbound customer conversations, extracts qualification criteria, and calculates a dynamic lead qualification index.",
-          contribution: [
-            "Engineered real-time chat interface with streaming responses",
-            "Constructed dynamic lead qualification score gauge",
-            "Built CRM synchronization pipeline"
-          ],
-          interfaceCallout: "Interface shows active customer thread and 85/100 lead score panel.",
-          techStack: ["Next.js", "WebSockets", "FastAPI"],
-          asset: {
-            src: "/assets/starz-ai-chats.png",
-            alt: "STARZ AI Chat and Lead Scoring Panel",
-            type: "image",
-            aspectRatio: "1672/941",
-            redactionZones: [
-              { top: "68%", left: "78%", width: "21%", height: "24%", label: "Redacted lead contact details" }
-            ]
-          },
-          stageColor: "#0b0c16",
-          links: [
-            { label: "CRM Portal", url: "https://crm.starz.vip", type: "live" }
-          ]
-        },
-        {
           id: "starz-pages",
-          beatIndex: "01.4",
-          eyebrow: "01.4 / STARZ — WEB AGENT",
-          title: "AI Landing Page Builder",
-          subtitleItalic: "Automated high-converting mobile web funnels.",
-          narrative: "Dynamically compiles conversion-focused landing pages with integrated lead capture and mobile-first layouts.",
+          beatIndex: "01.2",
+          eyebrow: "01.2 / STARZ — WEB AGENT",
+          title: "AI Landing Page Generator",
+          subtitleItalic: "Conversion-focused pages, generated from a business profile.",
+          narrative: "Generates complete conversion-focused landing pages from a business profile, with integrated lead capture and mobile-first layouts, ready to publish.",
           contribution: [
-            "Built landing page visual builder canvas",
+            "Built landing page generation and visual builder canvas",
             "Constructed integrated lead capture telemetry",
             "Engineered responsive preview container"
           ],
@@ -231,26 +178,29 @@ export const PORTFOLIO_DATA: PortfolioData = {
           ]
         },
         {
-          id: "starz-ads",
-          beatIndex: "01.5",
-          eyebrow: "01.5 / STARZ — PAID AD AGENT",
-          title: "AI Ad Campaign Studio",
-          subtitleItalic: "Four tailored variants created in a paused state for human review.",
-          narrative: "Constructs tailored advertising copy and multi-variant creative assets. Creates the Meta Ads campaign in a paused state, keeping final activation and budget allocation under human control.",
+          id: "starz-chats",
+          beatIndex: "01.3",
+          eyebrow: "01.3 / STARZ — CONVERSATIONAL AGENT",
+          title: "WhatsApp & Review Automation",
+          subtitleItalic: "Automated WhatsApp replies and Google Business Profile responses.",
+          narrative: "Answers inbound WhatsApp conversations automatically and posts replies to Google Business Profile reviews and comments, keeping every thread handled and scored without a human in the loop.",
           contribution: [
-            "Built 4-variant ad campaign layout workspace",
-            "Integrated Meta Marketing API campaign creation in paused state",
-            "Constructed target audience and copy selector"
+            "Built WhatsApp automation with streaming generated replies",
+            "Automated Google Business Profile review and comment responses",
+            "Constructed lead qualification scoring across both channels"
           ],
-          interfaceCallout: "Interface shows 4 ad variants with campaign created in a paused state for human review.",
-          techStack: ["Next.js", "FastAPI", "Meta Marketing API"],
+          interfaceCallout: "Interface shows active customer thread and 85/100 lead score panel.",
+          techStack: ["Next.js", "WhatsApp API", "WebSockets", "FastAPI"],
           asset: {
-            src: "/assets/starz-ai-ads.png",
-            alt: "STARZ AI Ads 4-Variant Studio",
+            src: "/assets/starz-ai-chats.png",
+            alt: "STARZ WhatsApp and Review Automation Panel",
             type: "image",
-            aspectRatio: "1920/1292"
+            aspectRatio: "1672/941",
+            redactionZones: [
+              { top: "68%", left: "78%", width: "21%", height: "24%", label: "Redacted lead contact details" }
+            ]
           },
-          stageColor: "#170f30",
+          stageColor: "#0b0c16",
           links: [
             { label: "CRM Portal", url: "https://crm.starz.vip", type: "live" }
           ]

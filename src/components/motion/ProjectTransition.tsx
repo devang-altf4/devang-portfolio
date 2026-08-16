@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { animate, createTimeline, stagger, utils } from "animejs";
+import { animate, createTimeline, stagger } from "animejs";
 import { PORTFOLIO_DATA } from "@/data/portfolio";
 import { initGsap } from "@/lib/motion";
 import { pageReady } from "@/lib/ready";
@@ -44,13 +44,19 @@ export default function ProjectTransition() {
 
     /**
      * The panels cover the whole viewport mid-sweep, so their resting position
-     * is driven by a timer rather than the timeline's onComplete. If anime
-     * stalls — an empty target set is enough — a callback-driven reset would
-     * strand an opaque curtain over the page with no way to clear it.
+     * is driven by a timer rather than the timeline's onComplete.
+     *
+     * Crucially this writes styles directly rather than through anime. anime
+     * pauses its engine while the tab is hidden, so a sweep interrupted by a
+     * tab switch freezes mid-flight — and a reset routed through the same
+     * paused engine freezes with it, stranding an opaque curtain over the
+     * page. The rescue must not depend on the thing it is rescuing.
      */
     const rest = () => {
-      utils.set(panels(), { transform: REST });
-      utils.set(cardRef.current!, { opacity: 0 });
+      panels().forEach((el) => {
+        (el as HTMLElement).style.transform = REST;
+      });
+      if (cardRef.current) cardRef.current.style.opacity = "0";
       running.current = false;
       setCard({ number: "", title: "" });
     };
@@ -93,6 +99,13 @@ export default function ProjectTransition() {
       }
     };
 
+    // A tab switch mid-sweep would otherwise leave the curtain frozen across
+    // the page until the next crossing.
+    const onHide = () => {
+      if (document.hidden && running.current) rest();
+    };
+    document.addEventListener("visibilitychange", onHide);
+
     // Arm only once the preloader is gone, so the first project doesn't fire
     // a chapter break the reader never sees.
     pageReady.then(() => {
@@ -114,6 +127,7 @@ export default function ProjectTransition() {
     return () => {
       cancelled = true;
       window.clearTimeout(resetTimer.current);
+      document.removeEventListener("visibilitychange", onHide);
       ctx?.revert();
     };
   }, []);
