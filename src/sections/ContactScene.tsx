@@ -3,42 +3,43 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PORTFOLIO_DATA } from "@/data/portfolio";
 import { ArrowUpRight } from "lucide-react";
+import { DUR, EASE, initGsap, splitWords } from "@/lib/motion";
 
 export default function ContactScene() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   const creator = PORTFOLIO_DATA.creator;
 
   useGSAP(
     () => {
-      gsap.registerPlugin(ScrollTrigger);
-
+      initGsap();
       const mm = gsap.matchMedia();
 
-      mm.add("(min-width: 1024px)", () => {
-        gsap.fromTo(
-          contentRef.current,
-          { opacity: 0, y: 50 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1.2,
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 70%",
-              end: "bottom 40%",
-              scrub: 1
-            }
-          }
-        );
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const words = splitWords(titleRef.current);
+        const rows = bodyRef.current?.querySelectorAll("[data-reveal]") ?? [];
+
+        gsap
+          .timeline({
+            scrollTrigger: { trigger: sectionRef.current, start: "top 72%" },
+            defaults: { ease: EASE.enter },
+          })
+          .fromTo(words, { yPercent: 118 }, { yPercent: 0, duration: 1.05, stagger: 0.045 }, 0)
+          .fromTo(
+            rows,
+            { opacity: 0, y: 24 },
+            { opacity: 1, y: 0, duration: DUR.copy, stagger: 0.09, ease: EASE.soft },
+            0.3
+          );
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set(contentRef.current, { opacity: 1, y: 0 });
+        gsap.set(bodyRef.current?.querySelectorAll("[data-reveal]") ?? [], { opacity: 1, y: 0 });
+        gsap.set(splitWords(titleRef.current), { yPercent: 0 });
       });
     },
     { scope: sectionRef }
@@ -48,62 +49,59 @@ export default function ContactScene() {
     <section
       ref={sectionRef}
       id="contact"
-      className="relative w-full min-h-screen bg-ink flex flex-col justify-between py-24 px-6 sm:px-12 lg:px-24 z-10 overflow-hidden"
+      className="relative z-10 flex min-h-screen w-full flex-col justify-between overflow-hidden bg-ink px-6 py-24 sm:px-12 lg:px-24"
     >
-      <div className="flex items-center space-x-3 text-xs font-sans text-neutral-400 uppercase tracking-widest pt-8">
-        <span>GET IN TOUCH</span>
-        <span className="w-8 h-[1px] bg-white/20" />
+      <div className="label flex items-center gap-3 pt-8 text-white/55">
+        <span>Get in touch</span>
+        <span className="h-px w-8 bg-white/20" />
       </div>
 
-      <div
-        ref={contentRef}
-        className="my-auto max-w-5xl space-y-8"
-      >
-        <h2 className="display text-4xl sm:text-7xl lg:text-8xl text-white leading-tight">
+      <div ref={bodyRef} className="my-auto max-w-5xl space-y-8">
+        <h2 ref={titleRef} className="display text-4xl leading-tight text-white sm:text-7xl lg:text-8xl">
           Have something worth building?{" "}
-          <span className="italic font-light text-violet-300 block text-3xl sm:text-6xl lg:text-7xl mt-2">
+          <span className="mt-2 block text-3xl font-light italic text-amethyst-soft sm:text-6xl lg:text-7xl">
             Let&apos;s talk.
           </span>
         </h2>
 
-        <p className="font-sans text-base sm:text-xl text-neutral-300 max-w-2xl leading-relaxed">
-          Open to engineering leadership, systems architecture, and high-impact software builds.
+        <p data-reveal className="max-w-2xl text-base leading-relaxed text-white/65 sm:text-xl">
+          Open to engineering roles, systems architecture, and high-impact software builds.
         </p>
 
-        <div className="pt-4 flex flex-wrap gap-4 items-center">
+        <div data-reveal className="flex flex-wrap items-center gap-4 pt-4">
           <a
             href={`mailto:${creator.email}`}
-            className="inline-flex items-center space-x-2 px-6 py-3.5 rounded-full bg-white text-black font-sans text-xs font-medium uppercase tracking-wider hover:bg-violet-200 transition-colors"
+            className="label inline-flex items-center gap-2 rounded-full bg-amethyst-deep px-6 py-3.5 text-white transition-colors hover:bg-amethyst-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
           >
-            <span>{creator.email}</span>
-            <ArrowUpRight className="w-4 h-4" />
+            {creator.email}
+            <ArrowUpRight className="h-4 w-4" />
           </a>
 
           <a
             href={creator.linkedin}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center space-x-2 px-6 py-3.5 rounded-full bg-neutral-900 border border-white/20 text-white font-sans text-xs font-medium uppercase tracking-wider hover:bg-neutral-800 transition-colors"
+            className="label inline-flex items-center gap-2 rounded-full border border-white/25 px-6 py-3.5 text-white transition-colors hover:bg-white hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
-            <span>LinkedIn</span>
-            <ArrowUpRight className="w-4 h-4" />
+            LinkedIn
+            <ArrowUpRight className="h-4 w-4" />
           </a>
 
           <a
             href={creator.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center space-x-2 px-6 py-3.5 rounded-full bg-neutral-900 border border-white/20 text-white font-sans text-xs font-medium uppercase tracking-wider hover:bg-neutral-800 transition-colors"
+            className="label inline-flex items-center gap-2 rounded-full border border-white/25 px-6 py-3.5 text-white transition-colors hover:bg-white hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
-            <span>GitHub</span>
-            <ArrowUpRight className="w-4 h-4" />
+            GitHub
+            <ArrowUpRight className="h-4 w-4" />
           </a>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between border-t border-white/10 pt-6 text-xs font-sans text-neutral-400 gap-4">
-        <div>© {new Date().getFullYear()} Devang Gupta. All rights reserved.</div>
-        <div>Engineered with Next.js, TypeScript & GSAP.</div>
+      <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/60 sm:flex-row">
+        <span>© {new Date().getFullYear()} Devang Gupta. All rights reserved.</span>
+        <span>Built with Next.js, TypeScript and GSAP.</span>
       </div>
     </section>
   );

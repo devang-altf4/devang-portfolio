@@ -36,7 +36,14 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     gsap.ticker.add(updateTicker);
     gsap.ticker.lagSmoothing(0);
 
+    // Pinned sections measure themselves at build time. Screenshots that decode
+    // afterwards change section heights, so every trigger has to re-measure or
+    // the pins fire at the wrong scroll positions.
+    const refresh = () => ScrollTrigger.refresh();
+    window.addEventListener("load", refresh);
+
     return () => {
+      window.removeEventListener("load", refresh);
       gsap.ticker.remove(updateTicker);
       lenis.destroy();
       lenisRef.current = null;

@@ -4,16 +4,24 @@
   --font-display: var(--font-display), "Helvetica Neue", Arial, sans-serif;
   --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
 
-  /* The page swings hard between these grounds. Nothing in between. */
-  --color-ink: #0b0b0c;
-  --color-ink-soft: #101014;
-  --color-paper: #f1ede4;
-  --color-paper-cool: #e9edf1;
-  --color-paper-warm: #e8dfcb;
-  --color-indigo: #2323ee;
-  --color-navy: #0a1f44;
-  --color-forest: #04351f;
-  --color-eink: #16161a;
+  /*
+   * One scheme, top to bottom: black ground, purple accent, white type. The
+   * two blacks sit a hair apart so adjacent sections read as layers rather
+   * than as a colour change — the page never cuts, it only deepens.
+   */
+  --color-ink: #08080a;
+  --color-ink-raised: #0f0e14;
+
+  /*
+   * Purple carries every accent: rules, counters, the active step. Three
+   * stops, because one purple can't do all three jobs and stay readable —
+   * `amethyst` clears 4.5:1 as type on black but only 4.2:1 *behind* white,
+   * so filled buttons drop to `amethyst-deep` (7.1:1).
+   */
+  --color-plum: #1d0b36;
+  --color-amethyst-deep: #6d28d9;
+  --color-amethyst: #8b5cf6;
+  --color-amethyst-soft: #c9b8ff;
 }
 
 :root {
@@ -31,8 +39,17 @@ body {
 }
 
 ::selection {
-  background-color: #2323ee;
+  background-color: #8b5cf6;
   color: #ffffff;
+}
+
+/* Ambient purple, sunk behind a plate. The only light source on the page. */
+.glow {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(90px);
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.32) 0%, rgba(29, 11, 54, 0.18) 45%, transparent 70%);
 }
 
 /* Display type is Archivo pushed wide — the one consistent voice on the page. */
@@ -59,6 +76,46 @@ body {
   font-size: 0.6875rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+}
+
+/*
+ * Headline word masks. The outer span clips, the inner span travels, so type
+ * rises from behind an edge instead of fading. The padding/margin pair gives
+ * descenders room to live inside the clip.
+ */
+.reveal-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.reveal-word-i {
+  display: inline-block;
+}
+
+/* Underline that draws in from the leading edge on hover. */
+.pull-link {
+  position: relative;
+}
+
+.pull-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.15em;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pull-link:hover::after,
+.pull-link:focus-visible::after {
+  transform: scaleX(1);
 }
 
 @media (prefers-reduced-motion: reduce) {

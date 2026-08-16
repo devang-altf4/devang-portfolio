@@ -3,42 +3,43 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PORTFOLIO_DATA } from "@/data/portfolio";
 import { ArrowUpRight } from "lucide-react";
+import { DUR, EASE, ENTER_START, initGsap, splitWords } from "@/lib/motion";
 
 export default function StarzSummaryScene() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   const project = PORTFOLIO_DATA.projects[0];
 
   useGSAP(
     () => {
-      gsap.registerPlugin(ScrollTrigger);
-
+      initGsap();
       const mm = gsap.matchMedia();
 
-      mm.add("(min-width: 1024px)", () => {
-        gsap.fromTo(
-          textRef.current,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1.2,
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 70%",
-              end: "bottom 30%",
-              scrub: 1
-            }
-          }
-        );
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const words = splitWords(titleRef.current);
+        const rows = bodyRef.current?.querySelectorAll("[data-reveal]") ?? [];
+
+        gsap
+          .timeline({
+            scrollTrigger: { trigger: sectionRef.current, start: ENTER_START },
+            defaults: { ease: EASE.enter },
+          })
+          .fromTo(words, { yPercent: 118 }, { yPercent: 0, duration: DUR.word, stagger: 0.04 }, 0)
+          .fromTo(
+            rows,
+            { opacity: 0, y: 22 },
+            { opacity: 1, y: 0, duration: DUR.copy, stagger: 0.08, ease: EASE.soft },
+            0.25
+          );
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set(textRef.current, { opacity: 1, y: 0 });
+        gsap.set(bodyRef.current?.querySelectorAll("[data-reveal]") ?? [], { opacity: 1, y: 0 });
+        gsap.set(splitWords(titleRef.current), { yPercent: 0 });
       });
     },
     { scope: sectionRef }
@@ -48,43 +49,40 @@ export default function StarzSummaryScene() {
     <section
       ref={sectionRef}
       id="starz-summary"
-      className="relative w-full min-h-[70vh] bg-ink flex items-center justify-center py-20 px-6 sm:px-12 lg:px-24 z-10 overflow-hidden"
+      className="relative z-10 flex min-h-[70vh] w-full items-center justify-center overflow-hidden bg-ink px-6 py-24 sm:px-12 lg:px-24"
     >
-      <div
-        ref={textRef}
-        className="w-full max-w-4xl text-center space-y-8 pointer-events-auto"
-      >
-        <div className="font-sans text-xs text-violet-400 uppercase tracking-widest">
-          STARZ ECOSYSTEM CONCLUSION
+      <div ref={bodyRef} className="w-full max-w-4xl space-y-8 text-center">
+        <div data-reveal className="label text-amethyst-soft">
+          Starz ecosystem — conclusion
         </div>
 
-        <h3 className="display text-3xl sm:text-5xl lg:text-6xl text-white leading-tight">
-          FIVE AI SYSTEMS.{" "}
-          <span className="italic font-light text-violet-300 block text-2xl sm:text-4xl lg:text-5xl mt-2">
-            ONE PRODUCT ECOSYSTEM.
+        <h3 ref={titleRef} className="display text-3xl leading-tight text-white sm:text-5xl lg:text-6xl">
+          Five AI systems.{" "}
+          <span className="mt-2 block text-2xl font-light italic text-amethyst-soft sm:text-4xl lg:text-5xl">
+            One product ecosystem.
           </span>
         </h3>
 
-        <p className="font-sans text-base sm:text-lg text-neutral-300 max-w-2xl mx-auto leading-relaxed">
-          From autonomous local search rank auditing to real-time conversation lead qualification and Meta ad campaign creation — all unified within a single full-stack architecture.
+        <p data-reveal className="mx-auto max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">
+          From autonomous local search auditing to real-time lead qualification and paused Meta ad
+          campaign creation — all unified in one full-stack architecture.
         </p>
 
-        {/* Disclaimer */}
         {project.disclaimer && (
-          <div className="pt-4 text-xs font-sans text-neutral-400">
+          <p data-reveal className="text-xs text-white/60">
             {project.disclaimer}
-          </div>
+          </p>
         )}
 
-        <div className="pt-4 flex justify-center items-center space-x-4">
+        <div data-reveal className="flex justify-center">
           <a
             href="https://crm.starz.vip"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-white text-black font-sans text-xs font-medium uppercase tracking-wider hover:bg-violet-200 transition-colors"
+            className="label inline-flex items-center gap-2 rounded-full bg-amethyst-deep px-6 py-3 text-white transition-colors hover:bg-amethyst-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
           >
-            <span>Visit CRM Portal</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
+            Visit CRM portal
+            <ArrowUpRight className="h-3.5 w-3.5" />
           </a>
         </div>
       </div>

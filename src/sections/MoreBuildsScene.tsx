@@ -3,42 +3,43 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PORTFOLIO_DATA } from "@/data/portfolio";
 import { ArrowUpRight } from "lucide-react";
+import { DUR, EASE, ENTER_START, initGsap, splitWords } from "@/lib/motion";
 
 export default function MoreBuildsScene() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   const moreBuilds = PORTFOLIO_DATA.moreBuilds;
 
   useGSAP(
     () => {
-      gsap.registerPlugin(ScrollTrigger);
-
+      initGsap();
       const mm = gsap.matchMedia();
 
-      mm.add("(min-width: 1024px)", () => {
-        gsap.fromTo(
-          cardRef.current,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 70%",
-              end: "bottom 40%",
-              scrub: 1
-            }
-          }
-        );
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const words = splitWords(titleRef.current);
+        const rows = bodyRef.current?.querySelectorAll("[data-reveal]") ?? [];
+
+        gsap
+          .timeline({
+            scrollTrigger: { trigger: sectionRef.current, start: ENTER_START },
+            defaults: { ease: EASE.enter },
+          })
+          .fromTo(words, { yPercent: 118 }, { yPercent: 0, duration: DUR.word, stagger: 0.045 }, 0)
+          .fromTo(
+            rows,
+            { opacity: 0, y: 18 },
+            { opacity: 1, y: 0, duration: DUR.copy, stagger: 0.08, ease: EASE.soft },
+            0.2
+          );
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set(cardRef.current, { opacity: 1, y: 0 });
+        gsap.set(bodyRef.current?.querySelectorAll("[data-reveal]") ?? [], { opacity: 1, y: 0 });
+        gsap.set(splitWords(titleRef.current), { yPercent: 0 });
       });
     },
     { scope: sectionRef }
@@ -48,29 +49,26 @@ export default function MoreBuildsScene() {
     <section
       ref={sectionRef}
       id="more-builds"
-      className="relative w-full min-h-[60vh] bg-paper flex items-center justify-center py-20 px-6 sm:px-12 lg:px-24 z-10 overflow-hidden"
+      className="relative z-10 flex min-h-[60vh] w-full items-center justify-center overflow-hidden bg-ink px-6 py-24 sm:px-12 lg:px-24"
     >
-      <div
-        ref={cardRef}
-        className="w-full max-w-4xl p-8 sm:p-12 rounded-3xl bg-neutral-900/40 border border-ink/15 backdrop-blur-sm text-center space-y-6"
-      >
-        <div className="font-sans text-xs text-ink/55 uppercase tracking-widest">
+      <div ref={bodyRef} className="w-full max-w-4xl space-y-8 text-center">
+        <div data-reveal className="label text-white/55">
           {moreBuilds.eyebrow}
         </div>
 
-        <h3 className="display text-3xl sm:text-5xl text-ink leading-tight">
+        <h3 ref={titleRef} className="display text-3xl leading-tight text-white sm:text-5xl">
           {moreBuilds.heading}
         </h3>
 
-        <div className="pt-4 flex justify-center">
+        <div data-reveal className="flex justify-center">
           <a
             href={moreBuilds.ctaUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-white text-black font-sans text-xs font-medium uppercase tracking-wider hover:bg-neutral-200 transition-colors"
+            className="label inline-flex items-center gap-2 rounded-full bg-amethyst-deep px-6 py-3 text-white transition-colors hover:bg-amethyst-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
           >
-            <span>{moreBuilds.ctaLabel}</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
+            {moreBuilds.ctaLabel}
+            <ArrowUpRight className="h-3.5 w-3.5" />
           </a>
         </div>
       </div>

@@ -15,6 +15,10 @@ import MoreBuildsScene from "@/sections/MoreBuildsScene";
 import AboutScene from "@/sections/AboutScene";
 import ContactScene from "@/sections/ContactScene";
 
+/**
+ * Scroll order is the argument: the flagship suite opens, walks through its five
+ * agents, closes on a summary, then the standalone builds follow by scale.
+ */
 export default function PortfolioPage() {
   return (
     <main className="relative w-full">

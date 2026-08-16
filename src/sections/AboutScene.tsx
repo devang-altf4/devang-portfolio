@@ -3,42 +3,43 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PORTFOLIO_DATA } from "@/data/portfolio";
 import { ArrowUpRight } from "lucide-react";
+import { DUR, EASE, ENTER_START, initGsap, splitWords } from "@/lib/motion";
 
 export default function AboutScene() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   const creator = PORTFOLIO_DATA.creator;
 
   useGSAP(
     () => {
-      gsap.registerPlugin(ScrollTrigger);
-
+      initGsap();
       const mm = gsap.matchMedia();
 
-      mm.add("(min-width: 1024px)", () => {
-        gsap.fromTo(
-          textRef.current,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 70%",
-              end: "bottom 30%",
-              scrub: 1
-            }
-          }
-        );
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const words = splitWords(titleRef.current);
+        const rows = bodyRef.current?.querySelectorAll("[data-reveal]") ?? [];
+
+        gsap
+          .timeline({
+            scrollTrigger: { trigger: sectionRef.current, start: ENTER_START },
+            defaults: { ease: EASE.enter },
+          })
+          .fromTo(words, { yPercent: 118 }, { yPercent: 0, duration: DUR.word, stagger: 0.035 }, 0)
+          .fromTo(
+            rows,
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: DUR.copy, stagger: 0.08, ease: EASE.soft },
+            0.25
+          );
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set(textRef.current, { opacity: 1, y: 0 });
+        gsap.set(bodyRef.current?.querySelectorAll("[data-reveal]") ?? [], { opacity: 1, y: 0 });
+        gsap.set(splitWords(titleRef.current), { yPercent: 0 });
       });
     },
     { scope: sectionRef }
@@ -48,53 +49,48 @@ export default function AboutScene() {
     <section
       ref={sectionRef}
       id="about"
-      className="relative w-full min-h-[70vh] bg-paper flex items-center justify-center py-20 px-6 sm:px-12 lg:px-24 z-10 overflow-hidden"
+      className="relative z-10 flex min-h-[70vh] w-full items-center justify-center overflow-hidden bg-ink px-6 py-24 sm:px-12 lg:px-24"
     >
-      <div
-        ref={textRef}
-        className="w-full max-w-4xl space-y-8"
-      >
-        <div className="flex items-center space-x-3">
-          <span className="font-sans text-xs text-ink/55 uppercase tracking-widest">
-            ABOUT // PHILOSOPHY
-          </span>
-          <span className="w-8 h-[1px] bg-ink/20" />
+      <div ref={bodyRef} className="w-full max-w-4xl space-y-8">
+        <div data-reveal className="label flex items-center gap-3 text-white/55">
+          <span>About — philosophy</span>
+          <span className="h-px w-8 bg-white/20" />
         </div>
 
-        <h3 className="display text-3xl sm:text-5xl lg:text-6xl text-ink leading-tight">
+        <h3 ref={titleRef} className="display text-3xl leading-tight text-white sm:text-5xl lg:text-6xl">
           Engineering systems that operate with{" "}
-          <span className="italic font-light text-violet-300">
-            autonomy, speed and craft.
-          </span>
+          <span className="font-light italic text-white/55">autonomy, speed and craft.</span>
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 text-ink/70 text-sm sm:text-base leading-relaxed">
-          <p>
-            I am a software engineer focused on building robust mobile applications, real-time voice & telephony pipelines, and coordinated multi-agent AI ecosystems.
+        <div className="grid grid-cols-1 gap-8 pt-4 text-sm leading-relaxed text-white/60 sm:text-base md:grid-cols-2">
+          <p data-reveal>
+            I build mobile applications, real-time voice and telephony pipelines, and coordinated
+            multi-agent AI systems.
           </p>
-          <p>
-            Whether architecting offline-first mobile databases, designing full-duplex conversational voice systems, or scaling verified real estate platforms, I prioritize direct execution and clean interfaces.
+          <p data-reveal>
+            Offline-first mobile databases, full-duplex conversational voice, verified property
+            platforms at scale — different problems, one habit: direct execution and clean interfaces.
           </p>
         </div>
 
-        <div className="pt-4 flex flex-wrap gap-4 items-center">
+        <div data-reveal className="flex flex-wrap items-center gap-4 pt-4">
           <a
             href={creator.linkedin}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-full bg-white text-black font-sans text-xs font-medium uppercase tracking-wider hover:bg-neutral-200 transition-colors"
+            className="label inline-flex items-center gap-2 rounded-full bg-amethyst-deep px-5 py-3 text-white transition-colors hover:bg-amethyst-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
           >
-            <span>Connect on LinkedIn</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
+            Connect on LinkedIn
+            <ArrowUpRight className="h-3.5 w-3.5" />
           </a>
           <a
             href={creator.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-full bg-neutral-900 border border-ink/25 text-ink font-sans text-xs font-medium uppercase tracking-wider hover:bg-neutral-800 transition-colors"
+            className="label inline-flex items-center gap-2 rounded-full border border-white/25 px-5 py-3 text-white transition-colors hover:bg-white hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
-            <span>GitHub Profile</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
+            GitHub profile
+            <ArrowUpRight className="h-3.5 w-3.5" />
           </a>
         </div>
       </div>

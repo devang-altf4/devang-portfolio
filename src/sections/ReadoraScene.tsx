@@ -7,69 +7,82 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PORTFOLIO_DATA } from "@/data/portfolio";
 import PhoneFrame from "@/components/motion/PhoneFrame";
 import { ArrowUpRight } from "lucide-react";
+import { DUR, EASE, ENTER_START, initGsap, splitWords } from "@/lib/motion";
 
 export default function ReadoraScene() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const eyebrowRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const detailRef = useRef<HTMLDivElement>(null);
   const phoneRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const project = PORTFOLIO_DATA.projects[1]; // readora
+  const project = PORTFOLIO_DATA.projects[1];
   const beat = project.beats[0];
 
   useGSAP(
     () => {
-      gsap.registerPlugin(ScrollTrigger);
-
+      initGsap();
       const mm = gsap.matchMedia();
 
-      mm.add("(min-width: 1024px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: "+=200%",
-            pin: true,
-            scrub: 1,
-            anticipatePin: 1
-          }
-        });
-
-        tl.fromTo(
-          textRef.current,
-          { opacity: 0, x: -30 },
-          { opacity: 1, x: 0, duration: 1 }
-        )
-        .fromTo(
-          phoneRef.current,
-          { opacity: 0, y: 50, scale: 0.95 },
-          { opacity: 1, y: 0, scale: 1, duration: 1.2 },
-          "<0.2"
-        )
-        .to(phoneRef.current, {
-          scale: 1.05,
-          yPercent: -10,
-          duration: 1.5,
-          ease: "power1.inOut"
-        });
+      // The demo only runs while it's on screen. An autoplaying video decoding
+      // off screen for the whole page is the cheapest frame budget to give back.
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: "top bottom",
+        end: "bottom top",
+        onToggle: (self) => {
+          const v = videoRef.current;
+          if (!v) return;
+          if (self.isActive) void v.play().catch(() => {});
+          else v.pause();
+        },
       });
 
-      mm.add("(max-width: 1023px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-            end: "bottom 20%",
-            scrub: 1
-          }
-        });
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const words = splitWords(titleRef.current);
+        const rows = detailRef.current?.querySelectorAll("[data-reveal]") ?? [];
 
-        tl.fromTo(textRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0 })
-          .fromTo(phoneRef.current, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1 }, "<0.2");
+        gsap
+          .timeline({
+            scrollTrigger: { trigger: sectionRef.current, start: ENTER_START },
+            defaults: { ease: EASE.enter },
+          })
+          .fromTo(eyebrowRef.current, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.7 }, 0)
+          .fromTo(words, { yPercent: 118 }, { yPercent: 0, duration: DUR.word, stagger: 0.04 }, 0.1)
+          .fromTo(
+            phoneRef.current,
+            { opacity: 0, y: 60, rotateX: 8 },
+            { opacity: 1, y: 0, rotateX: 0, duration: 1.4 },
+            0.15
+          )
+          .fromTo(
+            rows,
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: DUR.copy, stagger: 0.07, ease: EASE.soft },
+            0.35
+          );
+
+        gsap.fromTo(
+          phoneRef.current,
+          { yPercent: 6 },
+          {
+            yPercent: -10,
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.9,
+            },
+          }
+        );
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set([textRef.current, phoneRef.current], { opacity: 1, x: 0, y: 0, scale: 1 });
+        gsap.set([eyebrowRef.current, phoneRef.current], { opacity: 1, x: 0, y: 0, yPercent: 0 });
+        gsap.set(detailRef.current?.querySelectorAll("[data-reveal]") ?? [], { opacity: 1, y: 0 });
+        gsap.set(splitWords(titleRef.current), { yPercent: 0 });
       });
     },
     { scope: sectionRef }
@@ -79,88 +92,81 @@ export default function ReadoraScene() {
     <section
       ref={sectionRef}
       id="readora-main"
-      className="relative w-full min-h-screen bg-paper-warm flex items-center justify-center py-20 px-6 sm:px-12 lg:px-24 z-10 overflow-hidden"
+      className="relative z-10 flex min-h-screen w-full items-center justify-center overflow-hidden bg-ink px-6 py-28 sm:px-12 lg:px-24"
     >
-      <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-        {/* Left Column: Narrative Copy */}
-        <div ref={textRef} className="lg:col-span-7 space-y-6">
-          <div className="flex items-center space-x-3">
-            <span className="font-sans text-xs text-ink/55 tracking-wider">
-              {project.projectNumber}
-            </span>
-            <span className="w-8 h-[1px] bg-ink/20" />
-            <span className="font-sans text-xs uppercase tracking-widest text-ink/55">
-              {beat.eyebrow}
-            </span>
+      <div className="grid w-full max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
+        <div className="space-y-6 lg:col-span-7">
+          <div ref={eyebrowRef} className="label flex flex-wrap items-center gap-3 text-white/55">
+            <span>{project.projectNumber}</span>
+            <span className="h-3 w-px bg-white/20" />
+            <span className="text-white">{project.title}</span>
+            <span className="h-3 w-px bg-white/20" />
+            <span>Mobile architecture</span>
           </div>
 
-          <h2 className="display text-4xl sm:text-6xl lg:text-7xl text-ink leading-tight">
-            {project.title}{" "}
-            <span className="italic font-light text-ink/70 block text-3xl sm:text-5xl lg:text-6xl mt-2">
+          <h2 ref={titleRef} className="display text-4xl leading-tight text-white sm:text-6xl lg:text-7xl">
+            {beat.title}{" "}
+            <span className="mt-2 block text-2xl font-light italic text-white/55 sm:text-4xl lg:text-5xl">
               {project.subtitleItalic}
             </span>
           </h2>
 
-          <p className="font-sans text-base sm:text-xl text-ink/80 leading-relaxed max-w-2xl">
-            {beat.narrative}
-          </p>
+          <div ref={detailRef} className="space-y-6">
+            <p data-reveal className="max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">
+              {beat.narrative}
+            </p>
 
-          {/* Key Contributions */}
-          <div className="pt-4 border-t border-ink/20 max-w-2xl">
-            <div className="font-sans text-[11px] uppercase tracking-widest text-ink/55 mb-3">
-              Key Contributions
+            <div data-reveal className="max-w-2xl border-t border-white/15 pt-4">
+              <div className="label mb-3 text-white/55">Key contributions</div>
+              <ul className="space-y-2">
+                {beat.contribution.map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-sm text-white/60">
+                    <span aria-hidden className="mt-0.5 text-xs text-white/55">—</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="space-y-2">
-              {beat.contribution.map((item, i) => (
-                <li key={i} className="flex items-start space-x-2 text-sm text-ink/70">
-                  <span className="font-sans text-ink/55 text-xs mt-0.5">—</span>
-                  <span>{item}</span>
+
+            <ul data-reveal className="flex max-w-2xl flex-wrap gap-2">
+              {project.techStack.map((tech) => (
+                <li
+                  key={tech}
+                  className="label rounded-full border border-white/15 px-3 py-1.5 text-[0.625rem] text-white/55"
+                >
+                  {tech}
                 </li>
               ))}
             </ul>
-          </div>
 
-          {/* Tech Stack Chips */}
-          <div className="flex flex-wrap gap-2 pt-2">
-            {project.techStack.map((tech, i) => (
-              <span
-                key={i}
-                className="px-3 py-1 rounded-full text-xs font-sans bg-neutral-900 border border-ink/20 text-ink/70"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-
-          {/* Links */}
-          <div className="pt-4 flex flex-wrap gap-4">
-            {beat.links.map((link, i) => (
-              <a
-                key={i}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-full bg-white text-black font-sans text-xs font-medium uppercase tracking-wider hover:bg-neutral-200 transition-colors"
-              >
-                <span>{link.label}</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </a>
-            ))}
+            <div data-reveal className="flex flex-wrap gap-4">
+              {beat.links.map((link) => (
+                <a
+                  key={link.url}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="label inline-flex items-center gap-2 rounded-full bg-amethyst-deep px-5 py-3 text-white transition-colors hover:bg-amethyst-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
+                >
+                  {link.label}
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Right Column: Phone Frame playing Video */}
-        <div ref={phoneRef} className="lg:col-span-5 flex justify-center">
+        <div ref={phoneRef} className="flex justify-center lg:col-span-5">
           <PhoneFrame>
-            <div className="relative w-full h-full bg-black">
+            <div className="relative h-full w-full bg-black">
               <video
                 ref={videoRef}
                 src={beat.asset.src}
-                autoPlay
                 loop
                 muted
                 playsInline
-                className="w-full h-full object-cover select-none pointer-events-none"
+                preload="metadata"
+                className="pointer-events-none h-full w-full select-none object-cover"
               />
             </div>
           </PhoneFrame>
