@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { PORTFOLIO_DATA } from "@/data/portfolio";
+import { projectById } from "@/data/portfolio";
 import { ArrowUpRight } from "lucide-react";
 import { DUR, EASE, ENTER_START, initGsap, splitWords } from "@/lib/motion";
 
@@ -12,7 +12,7 @@ export default function StarzSummaryScene() {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  const project = PORTFOLIO_DATA.projects[0];
+  const project = projectById("starz");
 
   useGSAP(
     () => {
@@ -56,9 +56,9 @@ export default function StarzSummaryScene() {
           Starz ecosystem — conclusion
         </div>
 
-        <h3 ref={titleRef} className="display text-3xl leading-tight text-white sm:text-5xl lg:text-6xl">
+        <h3 ref={titleRef} className="display text-2xl leading-tight text-white sm:text-4xl lg:text-5xl">
           Three AI systems.{" "}
-          <span className="mt-2 block text-2xl font-light italic text-amethyst-soft sm:text-4xl lg:text-5xl">
+          <span className="mt-2 block text-xl font-light text-amethyst-soft sm:text-3xl lg:text-4xl">
             One product ecosystem.
           </span>
         </h3>

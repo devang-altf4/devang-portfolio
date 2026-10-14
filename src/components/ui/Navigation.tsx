@@ -4,22 +4,37 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { initGsap } from "@/lib/motion";
+import { PORTFOLIO_DATA } from "@/data/portfolio";
 
 const SECTIONS = [
+  { id: "hero", counter: "00" },
+  { id: "at-a-glance", counter: "00" },
   { id: "starz-overview", counter: "01" },
   { id: "starz-rank", counter: "01.1" },
   { id: "starz-pages", counter: "01.2" },
   { id: "starz-chats", counter: "01.3" },
   { id: "starz-summary", counter: "01" },
-  { id: "readora-main", counter: "02" },
-  { id: "calling-main", counter: "03" },
-  { id: "estatex-main", counter: "04" },
-  { id: "reel-main", counter: "05" },
-  { id: "peerly-main", counter: "06" },
+  { id: "calling-main", counter: "02" },
+  { id: "readora-main", counter: "03" },
+  { id: "truesample-main", counter: "04" },
   { id: "more-builds", counter: "—" },
   { id: "about", counter: "—" },
   { id: "contact", counter: "—" },
 ];
+
+const { creator } = PORTFOLIO_DATA;
+/**
+ * "Let's connect" scrolls to the contact section rather than opening a mail
+ * client: email, LinkedIn and GitHub sit side by side there, and the reader
+ * picks the channel. A plain #contact anchor underneath, so it still works
+ * before hydration.
+ */
+function goToContact(e: React.MouseEvent<HTMLAnchorElement>) {
+  const target = document.getElementById("contact");
+  if (!target) return;
+  e.preventDefault();
+  window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY, behavior: "smooth" });
+}
 
 export default function Navigation() {
   const [counter, setCounter] = useState("00");
@@ -93,6 +108,7 @@ export default function Navigation() {
       />
 
       <header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex items-center justify-between px-6 py-6 text-white sm:px-10">
+        <div className="pointer-events-none flex items-center gap-4">
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -101,11 +117,22 @@ export default function Navigation() {
           Devang Gupta
         </button>
 
+        {/* Beside the name, not centred: centred, it ran into the counter on tablets.
+            Hidden on phones, where the connect button carries the same dot. */}
+        <span className="label pointer-events-auto hidden items-center gap-2 rounded-full border border-white/12 bg-ink/70 px-3.5 py-1.5 text-white/80 md:inline-flex">
+          <span className="relative flex h-1.5 w-1.5" aria-hidden>
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amethyst opacity-70" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amethyst-soft" />
+          </span>
+          {creator.availability}
+        </span>
+        </div>
+
         <div className="pointer-events-auto flex items-center gap-5">
           <span className="label tabular-nums text-amethyst-soft">{counter}</span>
           <span className="hidden h-3 w-px bg-white/25 sm:block" />
           <a
-            href="https://github.com/devang-altf4"
+            href={creator.github}
             target="_blank"
             rel="noopener noreferrer"
             className="label hidden transition-opacity hover:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current sm:inline"
@@ -113,7 +140,7 @@ export default function Navigation() {
             GitHub
           </a>
           <a
-            href="https://www.linkedin.com/in/devang-gupta-267475343/"
+            href={creator.linkedin}
             target="_blank"
             rel="noopener noreferrer"
             className="label hidden transition-opacity hover:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current sm:inline"
@@ -121,10 +148,12 @@ export default function Navigation() {
             LinkedIn
           </a>
           <a
-            href="mailto:maybedevang29@gmail.com"
-            className="label rounded-full border border-amethyst/50 px-4 py-2 text-amethyst-soft transition-colors hover:bg-amethyst hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
+            href="#contact"
+            onClick={goToContact}
+            className="label inline-flex items-center gap-2 rounded-full border border-amethyst/50 bg-ink/60 px-4 py-2 text-white transition-colors hover:border-amethyst hover:bg-amethyst-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
           >
-            Email
+            <span className="h-1.5 w-1.5 rounded-full bg-amethyst-soft md:hidden" aria-hidden />
+            Let&apos;s connect
           </a>
         </div>
       </header>

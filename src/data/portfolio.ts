@@ -26,6 +26,8 @@ export interface BeatAsset {
   aspectRatio: string;
   redactionZones?: RedactionZone[];
   additionalAssets?: SubAsset[];
+  /** One screenshot per scroll step. When present, the screen swaps as the steps advance. */
+  frames?: string[];
 }
 
 export interface BeatData {
@@ -64,6 +66,9 @@ export interface CreatorData {
   linkedin: string;
   github: string;
   canonical: string;
+  location: string;
+  /** Shown in the nav, hero, contact section and link preview. Edit it in one place. */
+  availability: string;
 }
 
 export interface MoreBuildsData {
@@ -88,12 +93,14 @@ export const PORTFOLIO_DATA: PortfolioData = {
     email: "maybedevang29@gmail.com",
     linkedin: "https://www.linkedin.com/in/devang-gupta-267475343/",
     github: "https://github.com/devang-altf4",
-    canonical: "https://devangbuilds.me"
+    canonical: "https://devangbuilds.me",
+    location: "Mumbai, India",
+    availability: "Available now"
   },
   projects: [
     {
       id: "starz",
-      projectNumber: "01 / 06",
+      projectNumber: "01 / 04",
       title: "STARZ AI Engine",
       subtitleItalic: "Multi-agent autonomous growth platform.",
       tagline: "Three coordinated AI agents automating Google Business Profile ranking, landing page generation, and customer conversation.",
@@ -104,13 +111,13 @@ export const PORTFOLIO_DATA: PortfolioData = {
         {
           id: "starz-overview",
           beatIndex: "01.0",
-          eyebrow: "01 / 06 — FLAGSHIP SUITE",
+          eyebrow: "01 / 04 — FLAGSHIP SUITE",
           title: "The Agent Architecture",
           subtitleItalic: "Three autonomous systems in one product suite.",
           narrative: "Engineered a synchronized ecosystem of AI agents that independently manage local search ranking, web presence, and customer conversation from a single unified interface.",
           contribution: [
             "Architected multi-agent orchestration layer",
-            "Built responsive mobile and web dashboard client",
+            "Built the mobile client and shipped it to Google Play",
             "Integrated cross-agent shared telemetry state"
           ],
           interfaceCallout: "Mobile client showing active agent cards and onboarding workflow.",
@@ -208,18 +215,55 @@ export const PORTFOLIO_DATA: PortfolioData = {
       ]
     },
     {
+      id: "ai-calling",
+      projectNumber: "02 / 04",
+      title: "AI Calling Agent",
+      subtitleItalic: "A voice agent that qualifies leads and books meetings.",
+      tagline: "Calls leads, learns their business and main need, and books a strategy call when they're interested. You can talk to it live from a browser.",
+      role: "Voice AI & Backend Engineer",
+      techStack: ["FastAPI", "Python", "Twilio", "Pipecat", "Gemini Live", "WebSockets"],
+      beats: [
+        {
+          id: "calling-main",
+          beatIndex: "02",
+          eyebrow: "02 / 04 — REAL-TIME VOICE AI",
+          title: "A Voice Agent That Books Meetings",
+          subtitleItalic: "Speech-to-speech conversations in natural Hinglish, over the phone or in the browser.",
+          narrative: "An outbound voice agent that calls leads, finds out what their business needs, and books a 20-minute strategy call through Calendly when they're interested. It runs live, so anyone can talk to it.",
+          contribution: [
+            "Streamed full-duplex audio between Twilio, the browser and Gemini Live over WebSockets",
+            "Built CSV lead ingestion that turns a list into an outbound call queue",
+            "Wrote each call's business, need, interest and booking back into the pipeline"
+          ],
+          interfaceCallout: "Interface shows the live voice demo, CSV lead upload, and the lead pipeline table.",
+          techStack: ["FastAPI", "Python", "Twilio", "Pipecat", "Gemini Live", "WebSockets"],
+          asset: {
+            src: "/assets/ai-calling-agent-live.webp",
+            alt: "AI Calling Agent workspace with live voice demo, campaign lead upload and lead pipeline",
+            type: "image",
+            aspectRatio: "1860/1125"
+          },
+          stageColor: "#081220",
+          links: [
+            { label: "Talk to it live", url: "https://callingagent-czbzdkg7eccub6d9.centralindia-01.azurewebsites.net/", type: "live" },
+            { label: "Source Repository", url: "https://github.com/devang-altf4/ai-calling-agent", type: "github" }
+          ]
+        }
+      ]
+    },
+    {
       id: "readora",
-      projectNumber: "02 / 06",
+      projectNumber: "03 / 04",
       title: "Readora",
       subtitleItalic: "Distraction-free, offline-first mobile e-reader.",
-      tagline: "A native offline e-reading application built for speed, clean typography, and local-only storage.",
-      role: "Mobile Architect & Full-Stack Developer",
+      tagline: "A native offline e-reading app built for speed, clean typography, and local-only storage.",
+      role: "Mobile & Full-Stack Developer",
       techStack: ["React Native", "Expo", "TypeScript", "Zustand", "SQLite", "FastAPI", "Python", "MongoDB Atlas", "PyMuPDF"],
       beats: [
         {
           id: "readora-main",
-          beatIndex: "02",
-          eyebrow: "02 / 06 — MOBILE ARCHITECTURE",
+          beatIndex: "03",
+          eyebrow: "03 / 04 — MOBILE ARCHITECTURE",
           title: "Engineered For Pure Reading",
           subtitleItalic: "Offline-first local document parsing and custom e-ink styling.",
           narrative: "Built an offline-first mobile reading experience with SQLite local storage, fast EPUB/PDF document indexing with PyMuPDF, and seamless theme inversion.",
@@ -244,154 +288,45 @@ export const PORTFOLIO_DATA: PortfolioData = {
       ]
     },
     {
-      id: "ai-calling",
-      projectNumber: "03 / 06",
-      title: "Outbound Calling Agent",
-      subtitleItalic: "Full-duplex speech orchestration and conversational turn-taking.",
-      tagline: "An automated voice agent workspace that ingests CSV lead lists, initiates telephony sessions, and conducts human-like conversations.",
-      role: "Voice AI & Backend Architect",
-      techStack: ["FastAPI", "Python", "Twilio", "Pipecat", "Gemini Live", "WebSockets"],
+      id: "truesample",
+      projectNumber: "04 / 04",
+      title: "TrueSample Player",
+      subtitleItalic: "Bit-perfect USB DAC playback on Android, without root.",
+      tagline: "An open-source Android music player with its own USB audio driver, so the samples in a file reach the DAC unchanged.",
+      role: "Android & Native Audio Engineer",
+      techStack: ["Kotlin", "Jetpack Compose", "C++", "JNI", "libusb", "FFmpeg", "USB Audio Class"],
       beats: [
         {
-          id: "calling-main",
-          beatIndex: "03",
-          eyebrow: "03 / 06 — REAL-TIME VOICE AI",
-          title: "Real-time Telephony Pipeline",
-          subtitleItalic: "Full-duplex speech orchestration and conversational turn-taking.",
-          narrative: "Engineered an outbound calling platform integrating Pipecat and Gemini Live over Twilio telephony channels with automated call outcome extraction.",
-          contribution: [
-            "Constructed low-latency audio streaming pipeline over WebSockets",
-            "Integrated Pipecat voice pipeline with Gemini Live",
-            "Built outbound calling dashboard with CSV lead ingestion"
-          ],
-          interfaceCallout: "Interface shows outbound calling dashboard, batch CSV upload, and live lead status queue.",
-          techStack: ["FastAPI", "Python", "Twilio", "Pipecat", "Gemini Live", "WebSockets"],
-          asset: {
-            src: "/assets/ai-calling-agent.png",
-            alt: "Outbound Calling Agent Workspace",
-            type: "image",
-            aspectRatio: "1672/941",
-            redactionZones: [
-              { top: "66%", left: "6%", width: "21%", height: "28%", label: "Redacted lead names and phone numbers" }
-            ]
-          },
-          stageColor: "#081220",
-          links: [
-            { label: "Source Repository", url: "https://github.com/devang-altf4/ai-calling-agent", type: "github" }
-          ]
-        }
-      ]
-    },
-    {
-      id: "estatex",
-      projectNumber: "04 / 06",
-      title: "EstateX",
-      subtitleItalic: "High-density real estate platform & verified inventory.",
-      tagline: "A comprehensive real estate marketplace featuring structured Rupee (₹) pricing tables, locality filtering, and high-volume property queries.",
-      role: "Full-Stack Web Architect",
-      techStack: ["Flutter", "Dart", "Firebase"],
-      beats: [
-        {
-          id: "estatex-main",
+          id: "truesample-main",
           beatIndex: "04",
-          eyebrow: "04 / 06 — PROPERTY PLATFORM",
-          title: "Verified Real Estate Platform",
-          subtitleItalic: "High-speed filtering across 860+ property listings.",
-          narrative: "Architected a live commercial and residential property platform with structured Indian Rupee (₹) price formatting, locality indexation, and verified inquiry flows.",
+          eyebrow: "04 / 04 — NATIVE AUDIO",
+          title: "Bit-Perfect Audio, No Root",
+          subtitleItalic: "Its own USB audio driver, skipping Android's mixer entirely.",
+          narrative: "Android resamples every app's audio to one fixed rate before a USB DAC ever sees it. TrueSample Player takes the DAC over USB itself and streams each file at its real sample rate and bit depth.",
           contribution: [
-            "Built high-density property grid and search indexing",
-            "Constructed localized currency formatters and data models",
-            "Developed responsive web portal and mobile app architecture"
+            "Wrote a USB audio driver in C++ on libusb that claims the DAC without root",
+            "Parsed UAC1 and UAC2 descriptors to pick the DAC's best mode for every song",
+            "Built the signal path view, hardware volume and graphic and parametric EQ in Jetpack Compose"
           ],
-          interfaceCallout: "Interface shows property directory with 864 listings and verified price matrix.",
-          techStack: ["Flutter", "Dart", "Firebase"],
+          interfaceCallout: "Interface shows the now-playing screen, output mode picker, and signal path.",
+          techStack: ["Kotlin", "Jetpack Compose", "C++", "JNI", "libusb", "FFmpeg"],
           asset: {
-            src: "/assets/estatex-dashboard.png",
-            alt: "EstateX Property Marketplace Dashboard",
+            src: "/assets/truesample-now-playing.png",
+            alt: "TrueSample Player now-playing screen with the source, rate, DSP and DAC signal path",
             type: "image",
-            aspectRatio: "1920/1751",
-            redactionZones: [
-              { top: "0.5%", left: "84%", width: "15%", height: "4.5%", label: "Redacted account name and email" },
-              { top: "74%", left: "75%", width: "17%", height: "8%", label: "Redacted contact phone and email" }
+            aspectRatio: "9/20",
+            // One per scroll step: the player carries the first three, the EQ the last.
+            frames: [
+              "/assets/truesample-now-playing.png",
+              "/assets/truesample-now-playing.png",
+              "/assets/truesample-now-playing.png",
+              "/assets/truesample-equalizer.png"
             ]
           },
-          stageColor: "#0c121a",
+          stageColor: "#0f0e14",
           links: [
-            { label: "Live Platform", url: "https://theestatex.com/", type: "live" }
-          ]
-        }
-      ]
-    },
-    {
-      id: "ai-reel",
-      projectNumber: "05 / 06",
-      title: "AI Reel Agent",
-      subtitleItalic: "Autonomous short-form video transcription and captioning.",
-      tagline: "Desktop video processing tool automating speech transcription, word-level animated caption burning, and 9:16 vertical video rendering.",
-      role: "Systems & Video Pipeline Developer",
-      techStack: ["Flutter", "FastAPI", "Python", "FFmpeg", "Whisper"],
-      beats: [
-        {
-          id: "reel-main",
-          beatIndex: "05",
-          eyebrow: "05 / 06 — VIDEO PIPELINE",
-          title: "Automated Short-Form Video Pipeline",
-          subtitleItalic: "1 Upload → 2 Transcribe → 3 Captions → 4 Render.",
-          narrative: "Created an automated short-form video generation tool that parses speech with Whisper, generates animated word-by-word subtitles, and renders 1080×1920 MP4 outputs via FFmpeg.",
-          contribution: [
-            "Built 4-stage sequential video rendering pipeline",
-            "Integrated Whisper automated speech transcription",
-            "Engineered FFmpeg caption burning and aspect ratio formatting"
-          ],
-          interfaceCallout: "Interface shows 4-step pipeline: Upload, Transcription, Captions, and 9:16 Render.",
-          techStack: ["Flutter", "FastAPI", "Python", "FFmpeg", "Whisper"],
-          asset: {
-            src: "/assets/ai-reel-agent.png",
-            alt: "AI Reel Agent Video Editing Software",
-            type: "image",
-            aspectRatio: "1672/941"
-          },
-          stageColor: "#140d08",
-          links: []
-        }
-      ]
-    },
-    {
-      id: "peerly",
-      projectNumber: "06 / 06",
-      title: "Peerly",
-      subtitleItalic: "Full-stack talent marketplace with real-time negotiation and payments.",
-      tagline: "A freelance marketplace connecting talent with clients, featuring real-time WebSocket chat and secure Razorpay payment integration.",
-      role: "Full-Stack Developer",
-      techStack: ["React", "Node.js", "Express", "MongoDB", "JWT", "WebSockets", "Razorpay"],
-      beats: [
-        {
-          id: "peerly-main",
-          beatIndex: "06",
-          eyebrow: "06 / 06 — TALENT MARKETPLACE",
-          title: "Marketplace, Chat & Payment Rails",
-          subtitleItalic: "Complete transaction lifecycle from discovery to checkout.",
-          narrative: "Built a full-stack freelance platform featuring category talent discovery, real-time WebSocket chat messaging, and native Razorpay checkout payment integration.",
-          contribution: [
-            "Engineered talent discovery catalog and service listing schemas",
-            "Constructed real-time WebSocket chat messaging system",
-            "Integrated Razorpay payment gateway and webhook verification"
-          ],
-          interfaceCallout: "Sequence displays live discovery portal, active chat conversation, and Razorpay payment modal.",
-          techStack: ["React", "Node.js", "Express", "MongoDB", "WebSockets", "Razorpay"],
-          asset: {
-            src: "/assets/peerly-dashboard.jpg",
-            alt: "Peerly Talent Discovery Dashboard",
-            type: "image",
-            aspectRatio: "1920/1003",
-            additionalAssets: [
-              { src: "/assets/peerly-chat.jpg", alt: "Peerly Real-time Chat Interface", aspectRatio: "1920/948" },
-              { src: "/assets/peerly-payment.jpg", alt: "Peerly Razorpay Payment Modal", aspectRatio: "800/408", maxDisplayWidth: "720px" }
-            ]
-          },
-          stageColor: "#061510",
-          links: [
-            { label: "Live Platform", url: "https://peerly.works", type: "live" }
+            { label: "Source Repository", url: "https://github.com/devang-altf4/truesample-player", type: "github" },
+            { label: "Download APK", url: "https://github.com/devang-altf4/truesample-player/releases/latest", type: "live" }
           ]
         }
       ]
@@ -404,3 +339,22 @@ export const PORTFOLIO_DATA: PortfolioData = {
     ctaUrl: "https://github.com/devang-altf4"
   }
 };
+
+/**
+ * Every "email me" link on the page. The subject is pre-filled so a first
+ * message takes one click, and kept neutral — it says where they came from,
+ * not what they want.
+ */
+export const EMAIL_HREF = `mailto:${PORTFOLIO_DATA.creator.email}?subject=${encodeURIComponent(
+  "Hello from devangbuilds.me"
+)}`;
+
+/**
+ * Scenes look their project up by id, never by position — the project list is
+ * reordered and trimmed often, and an index silently points at the wrong one.
+ */
+export function projectById(id: string): ProjectData {
+  const project = PORTFOLIO_DATA.projects.find((p) => p.id === id);
+  if (!project) throw new Error(`Unknown project: ${id}`);
+  return project;
+}

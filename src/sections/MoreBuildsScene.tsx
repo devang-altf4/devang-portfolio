@@ -56,7 +56,7 @@ export default function MoreBuildsScene() {
           {moreBuilds.eyebrow}
         </div>
 
-        <h3 ref={titleRef} className="display text-3xl leading-tight text-white sm:text-5xl">
+        <h3 ref={titleRef} className="display text-2xl leading-tight text-white sm:text-4xl">
           {moreBuilds.heading}
         </h3>
 

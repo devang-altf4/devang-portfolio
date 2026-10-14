@@ -1,9 +1,9 @@
 "use client";
 
 import ScreenScene from "@/components/motion/ScreenScene";
-import { PORTFOLIO_DATA } from "@/data/portfolio";
+import { projectById } from "@/data/portfolio";
 
-const project = PORTFOLIO_DATA.projects[0];
+const project = projectById("starz");
 
 export default function StarzRankScene() {
   return (

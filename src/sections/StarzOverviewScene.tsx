@@ -1,9 +1,9 @@
 "use client";
 
 import DeviceScene from "@/components/motion/DeviceScene";
-import { PORTFOLIO_DATA } from "@/data/portfolio";
+import { projectById } from "@/data/portfolio";
 
-const project = PORTFOLIO_DATA.projects[0];
+const project = projectById("starz");
 
 export default function StarzOverviewScene() {
   return (

@@ -1,10 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowUpRight } from "lucide-react";
 import type { BeatData, ProjectData } from "@/data/portfolio";
 import PhoneFrame from "@/components/motion/PhoneFrame";
@@ -72,6 +71,7 @@ export default function DeviceScene({
   const moves = focus.slice(1);
   const copyLeft = side === "left";
   const isVideo = beat.asset.type === "video";
+  const frames = beat.asset.frames ?? [];
   const kicker = beat.eyebrow.split("—").pop()?.trim() ?? beat.eyebrow;
 
   const steps = focus.map((f, i) => ({
@@ -79,26 +79,49 @@ export default function DeviceScene({
     body: i === 0 ? beat.narrative : beat.contribution[i - 1] ?? beat.interfaceCallout,
   }));
 
+  /*
+   * The demo only runs while it's on screen — an autoplaying video decoding
+   * off screen all page is the cheapest budget to give back.
+   *
+   * This is an IntersectionObserver, not a ScrollTrigger. The trigger was
+   * created before this section's own pin, so it measured the section without
+   * the pin's extra scroll and switched "off" halfway through the pin: the
+   * video paused on its first frame while the reader was still looking at it.
+   * A pinned section stays visible for the whole pin, so visibility is the
+   * right signal, and it needs no knowledge of pin spacing at all.
+   */
+  useEffect(() => {
+    const v = videoRef.current;
+    const section = sectionRef.current;
+    if (!isVideo || !v || !section) return;
+    let onScreen = false;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        if (onScreen) void v.play().catch(() => {});
+        else v.pause();
+      },
+      { threshold: 0.15 }
+    );
+    io.observe(section);
+
+    // Browsers suspend video in a hidden tab. Coming back, pick it up again
+    // rather than leaving the demo frozen on whatever frame it stopped at.
+    const onVisible = () => {
+      if (!document.hidden && onScreen) void v.play().catch(() => {});
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [isVideo]);
+
   useGSAP(
     () => {
       initGsap();
       const mm = gsap.matchMedia();
-
-      if (isVideo) {
-        // The demo only runs while it's on screen. An autoplaying video
-        // decoding off screen all page is the cheapest budget to give back.
-        ScrollTrigger.create({
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          onToggle: (self) => {
-            const v = videoRef.current;
-            if (!v) return;
-            if (self.isActive) void v.play().catch(() => {});
-            else v.pause();
-          },
-        });
-      }
 
       const settle = () => {
         gsap.set(pushRef.current, { scale: 1 });
@@ -342,7 +365,23 @@ export default function DeviceScene({
                       preload="metadata"
                       className="pointer-events-none h-full w-full select-none object-cover"
                     />
-                  ) : (
+                  ) : frames.length > 0 ? (
+                    // One screenshot per step, cross-faded as the step changes.
+                    // Opacity only, so nothing crops or rescales the interface.
+                    // A screenshot can cover several steps, so each distinct image is
+                    // rendered once and shown while the active step points at it.
+                    Array.from(new Set(frames)).map((src, i) => (
+                      <Image
+                        key={src}
+                        src={src}
+                        alt={i === 0 ? beat.asset.alt : ""}
+                        fill
+                        sizes="(max-width: 1023px) 60vw, 30vw"
+                        className="select-none object-cover object-top transition-opacity duration-500"
+                        style={{ opacity: src === frames[Math.min(active, frames.length - 1)] ? 1 : 0 }}
+                      />
+                    ))
+                  ) : beat.asset.src ? (
                     <Image
                       src={beat.asset.src}
                       alt={beat.asset.alt}
@@ -351,6 +390,10 @@ export default function DeviceScene({
                       sizes="(max-width: 1023px) 60vw, 30vw"
                       className="select-none object-cover object-top"
                     />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-ink-raised px-6 text-center">
+                      <span className="label text-white/35">Screenshots coming</span>
+                    </div>
                   )}
                 </div>
 
@@ -382,7 +425,7 @@ export default function DeviceScene({
 
           <h2
             ref={titleRef}
-            className="display text-[clamp(1.6rem,5.4vw,2.4rem)] text-white lg:mt-7 lg:text-[clamp(2.25rem,3.5vw,3.6rem)]"
+            className="display text-[clamp(1.35rem,4.6vw,2rem)] text-white lg:mt-7 lg:text-[clamp(1.85rem,2.8vw,2.9rem)]"
           >
             {beat.title}
           </h2>

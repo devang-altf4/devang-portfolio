@@ -402,7 +402,7 @@ export default function ScreenScene({
 
           <h2
             ref={titleRef}
-            className="display text-[clamp(1.6rem,5.4vw,2.4rem)] text-white lg:mt-7 lg:text-[clamp(2rem,2.9vw,3rem)]"
+            className="display text-[clamp(1.35rem,4.6vw,2rem)] text-white lg:mt-7 lg:text-[clamp(1.65rem,2.3vw,2.4rem)]"
           >
             {beat.title}
           </h2>
@@ -429,13 +429,17 @@ export default function ScreenScene({
 
             {beat.links.length > 0 && (
               <div data-reveal className="mt-5 flex flex-nowrap gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mt-7 lg:flex-wrap lg:overflow-visible">
-                {beat.links.map((link) => (
+                {beat.links.map((link, i) => (
                   <a
                     key={link.url}
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="label inline-flex shrink-0 items-center gap-2 rounded-full border border-amethyst/50 px-5 py-2.5 text-amethyst-soft lg:px-6 lg:py-3 transition-colors hover:bg-amethyst hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
+                    className={`label inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 transition-colors focus-visible:outline-2 lg:px-6 lg:py-3 focus-visible:outline-offset-2 focus-visible:outline-amethyst ${
+                      i === 0
+                        ? "bg-amethyst-deep text-white hover:bg-amethyst-soft hover:text-ink"
+                        : "border border-amethyst/50 text-amethyst-soft hover:bg-amethyst hover:text-white"
+                    }`}
                   >
                     {link.label}
                     <ArrowUpRight className="h-3.5 w-3.5" />

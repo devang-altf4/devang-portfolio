@@ -57,19 +57,20 @@ export default function AboutScene() {
           <span className="h-px w-8 bg-white/20" />
         </div>
 
-        <h3 ref={titleRef} className="display text-3xl leading-tight text-white sm:text-5xl lg:text-6xl">
+        <h3 ref={titleRef} className="display text-2xl leading-tight text-white sm:text-4xl lg:text-5xl">
           Engineering systems that operate with{" "}
-          <span className="font-light italic text-white/55">autonomy, speed and craft.</span>
+          <span className="font-light text-white/55">autonomy, speed and craft.</span>
         </h3>
 
         <div className="grid grid-cols-1 gap-8 pt-4 text-sm leading-relaxed text-white/60 sm:text-base md:grid-cols-2">
           <p data-reveal>
-            I build mobile applications, real-time voice and telephony pipelines, and coordinated
-            multi-agent AI systems.
+            I build mobile applications, real-time voice and telephony pipelines, coordinated
+            multi-agent AI systems, and the native code underneath when the platform gets in the way.
           </p>
           <p data-reveal>
-            Offline-first mobile databases, full-duplex conversational voice, verified property
-            platforms at scale — different problems, one habit: direct execution and clean interfaces.
+            Offline-first mobile databases, full-duplex conversational voice, a USB audio driver
+            that bypasses Android&apos;s mixer — different problems, one habit: direct execution and
+            clean interfaces.
           </p>
         </div>
 

@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { PORTFOLIO_DATA } from "@/data/portfolio";
+import { EMAIL_HREF, PORTFOLIO_DATA } from "@/data/portfolio";
 import { ArrowUpRight } from "lucide-react";
 import { DUR, EASE, initGsap, splitWords } from "@/lib/motion";
 
@@ -57,20 +57,21 @@ export default function ContactScene() {
       </div>
 
       <div ref={bodyRef} className="my-auto max-w-5xl space-y-8">
-        <h2 ref={titleRef} className="display text-4xl leading-tight text-white sm:text-7xl lg:text-8xl">
+        <h2 ref={titleRef} className="display text-3xl leading-tight text-white sm:text-6xl lg:text-7xl">
           Have something worth building?{" "}
-          <span className="mt-2 block text-3xl font-light italic text-amethyst-soft sm:text-6xl lg:text-7xl">
+          <span className="mt-2 block text-2xl font-light text-amethyst-soft sm:text-5xl lg:text-6xl">
             Let&apos;s talk.
           </span>
         </h2>
 
         <p data-reveal className="max-w-2xl text-base leading-relaxed text-white/65 sm:text-xl">
-          Open to engineering roles, systems architecture, and high-impact software builds.
+          {creator.availability} for full-time engineering roles. Based in {creator.location}, open
+          to remote or on-site. Email is the fastest way to reach me.
         </p>
 
         <div data-reveal className="flex flex-wrap items-center gap-4 pt-4">
           <a
-            href={`mailto:${creator.email}`}
+            href={EMAIL_HREF}
             className="label inline-flex items-center gap-2 rounded-full bg-amethyst-deep px-6 py-3.5 text-white transition-colors hover:bg-amethyst-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amethyst"
           >
             {creator.email}

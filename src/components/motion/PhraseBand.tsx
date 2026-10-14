@@ -30,7 +30,7 @@ export default function PhraseBand({
       {phrases.map((phrase) => (
         <p
           key={phrase}
-          className={`display absolute inset-x-0 bottom-0 text-[clamp(1.1rem,2vw,1.75rem)] leading-[1.25] text-white ${
+          className={`display absolute inset-x-0 bottom-0 text-[clamp(0.95rem,1.6vw,1.4rem)] leading-[1.3] text-white ${
             align === "right" ? "text-right" : "text-left"
           }`}
         >
