@@ -35,3 +35,9 @@ Thumbs.db
 .idea/
 .claude/
 *.log
+
+# brainstorming mockups (local only)
+.superpowers/
+# Playwright MCP logs — must stay ignored: Tailwind v4 scans every non-ignored file, so
+# their constant writes retriggered dev rebuilds and served half-written bundles.
+.playwright-mcp/

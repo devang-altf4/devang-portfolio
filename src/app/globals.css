@@ -1,359 +1,350 @@
 @import "tailwindcss";
 
+/*
+ * The stage: near-black ground, warm off-white type, and one accent — the
+ * amber of the light in the footage (sampled from hero-poster.jpg, lifted to
+ * read on black). The work supplies every other colour.
+ */
 @theme {
-  --font-display: var(--font-unbounded), "Helvetica Neue", Arial, sans-serif;
-  --font-sans: "Satoshi", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-ink: #050505;
+  --color-ink-2: #0d0c0b;
+  --color-paper: #f2ede6;
+  --color-muted: #9b958d;
+  --color-line: rgba(242, 237, 230, 0.12);
+  --color-amber: #e2b07c;
 
-  /*
-   * One scheme, top to bottom: black ground, purple accent, white type. The
-   * two blacks sit a hair apart so adjacent sections read as layers rather
-   * than as a colour change — the page never cuts, it only deepens.
-   */
-  --color-ink: #08080a;
-  --color-ink-raised: #0f0e14;
-
-  /*
-   * Purple carries every accent: rules, counters, the active step. Three
-   * stops, because one purple can't do all three jobs and stay readable —
-   * `amethyst` clears 4.5:1 as type on black but only 4.2:1 *behind* white,
-   * so filled buttons drop to `amethyst-deep` (7.1:1).
-   */
-  --color-plum: #1d0b36;
-  --color-amethyst-deep: #6d28d9;
-  --color-amethyst: #8b5cf6;
-  --color-amethyst-soft: #c9b8ff;
+  --font-display: var(--display-face), Georgia, serif;
+  --font-body: var(--body-face), system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+/*
+ * Cinzel for display (Devang's pick, 2026-10-30): carved Roman capitals, the
+ * same family of letter as the glass name in the 3D renders. Switzer for
+ * reading. --ds scales headline sizes: Cinzel's capitals set wide.
+ */
 :root {
-  color-scheme: dark;
+  --display-face: var(--font-cinzel);
+  --body-face: "Switzer";
+  --ds: 0.8;
+  --dw: 600;
+  --dt: 0.01em;
+  --dcase: uppercase;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: var(--dw);
+  letter-spacing: var(--dt);
+  text-transform: var(--dcase);
+  line-height: 1;
+  text-wrap: balance;
 }
 
 html {
+  background: var(--color-ink);
+  color: var(--color-paper);
   -webkit-font-smoothing: antialiased;
+  color-scheme: dark;
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   overflow-x: hidden;
-  background-color: var(--color-ink);
 }
 
 ::selection {
-  background-color: #8b5cf6;
-  color: #ffffff;
+  background: var(--color-amber);
+  color: var(--color-ink);
+}
+
+/* Small supporting text: index numbers, kickers, captions. Sentence case. */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
 }
 
 /*
- * Ambient purple, sunk behind a plate.
- *
- * A radial gradient, deliberately not `filter: blur()`. Blur cost scales with
- * area times radius, and this element is ~550px square with a 90px radius —
- * ten of them on the page, several animating inside a pinned section. A
- * multi-stop gradient is already soft, paints in one pass, and needs no
- * filter layer at all.
+ * Film grain over everything: one static SVG noise tile, no animation and no
+ * filter layer, so it costs a single composited paint.
  */
-.glow {
-  position: absolute;
-  border-radius: 9999px;
-  pointer-events: none;
-  will-change: opacity;
-  background: radial-gradient(
-    closest-side,
-    rgba(139, 92, 246, 0.26) 0%,
-    rgba(139, 92, 246, 0.17) 28%,
-    rgba(109, 40, 217, 0.09) 52%,
-    rgba(29, 11, 54, 0.04) 72%,
-    transparent 100%
-  );
-}
-
-/*
- * Unbounded sets wide and round, so it wants firm negative tracking at every
- * size and a touch more line-height than Sora did — its tall caps collide at
- * 0.98. Weights stop at 700: heavier, the counters fill in on phones.
- */
-.display {
-  font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 1.08;
-  text-wrap: balance;
-}
-
-.display-xl {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.045em;
-  line-height: 1.02;
-  text-wrap: balance;
-}
-
-/* The quiet half of a two-tone headline: same face, light and receding. */
-.display-soft {
-  font-weight: 300;
-  letter-spacing: -0.04em;
-}
-
-/*
- * Small uppercase utility label, in Satoshi. 700 rather than 600 — Satoshi
- * ships 400/500/700/900, and a 600 request would be faux-bolded.
- */
-.label {
-  font-family: var(--font-sans);
-  font-weight: 700;
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-/*
- * Headline word masks. The outer span clips, the inner span travels, so type
- * rises from behind an edge instead of fading. The padding/margin pair gives
- * descenders room to live inside the clip.
- */
-.reveal-word {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: bottom;
-  padding-bottom: 0.14em;
-  margin-bottom: -0.14em;
-}
-
-.reveal-word-i {
-  display: inline-block;
-}
-
-/*
- * The opening: a boot sequence in three acts (see Preloader.tsx). Every step
- * below is a CSS animation with a fixed delay from first paint, so the whole
- * thing plays identically however late React hydrates. Timeline, in ms:
- *
- *   0–2400     counter 000→100, log lines every 360ms, bar fills
- *   2500       boot lifts away
- *   2600–3250  name rises letter by letter; role fades in at 3050
- *   3450       name fades, seam draws across the middle
- *   3750       halves split (800ms); Preloader.tsx releases the page here
- *
- * `boot` carries a failsafe: if JavaScript never arrives, the overlay hides
- * itself at 7s rather than sitting over the page forever.
- */
-.boot {
-  pointer-events: none;
-  animation: boot-failsafe 0.01s linear 7s forwards;
-}
-
-/* The two halves the screen splits into. They are the ground until then. */
-.boot-half {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 50.5%;
-  background: var(--color-ink);
-  animation: 0.8s cubic-bezier(0.76, 0, 0.24, 1) 3.75s forwards;
-}
-.boot-top {
-  top: 0;
-  animation-name: boot-split-up;
-}
-.boot-bottom {
-  bottom: 0;
-  animation-name: boot-split-down;
-}
-
-/* ── Act 1: the boot ─────────────────────────────── */
-.boot-body {
-  animation: boot-lift 0.45s cubic-bezier(0.7, 0, 0.84, 0) 2.5s forwards;
-}
-
-.boot-count {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.06em;
-  line-height: 0.85;
-  font-size: clamp(5.5rem, 22vw, 18.75rem);
-  font-variant-numeric: tabular-nums;
-  color: #ffffff;
-}
-.boot-count small {
-  font-size: 0.28em;
-  margin-left: 0.1em;
-  letter-spacing: -0.02em;
-  color: var(--color-amethyst-soft);
-}
-
-/*
- * The digits are a CSS counter driven by a registered integer property, so
- * they tick from first paint with no JavaScript. `pad3` zero-pads to 000;
- * where @counter-style is unsupported it falls back to plain decimals. The
- * curve is gentle on purpose: the number visibly climbs the whole way rather
- * than leaping to 90 and crawling.
- */
-@property --boot-n {
-  syntax: "<integer>";
-  initial-value: 0;
-  inherits: false;
-}
-
-@counter-style pad3 {
-  system: extends decimal;
-  pad: 3 "0";
-}
-
-.boot-num {
-  counter-reset: boot var(--boot-n);
-  animation: boot-count 2.4s cubic-bezier(0.45, 0.05, 0.35, 1) forwards;
-}
-.boot-num::before {
-  content: counter(boot, pad3);
-}
-
-.boot-log {
-  min-height: 11.5em;
-  font: 500 0.875rem/1.9 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  color: rgba(255, 255, 255, 0.6);
-}
-.boot-log > div {
-  display: flex;
-  align-items: baseline;
-  gap: 0.9em;
-  opacity: 0;
-  transform: translateY(6px);
-  animation: boot-line 0.22s ease-out var(--d) forwards;
-}
-.boot-log b {
-  font-weight: 500;
-  color: var(--color-amethyst-soft);
-  min-width: 3.4em;
-}
-.boot-what {
-  white-space: nowrap;
-}
-/* The dotted leader draws out, then the line is stamped ok. */
-.boot-leader {
-  flex: 1;
-  min-width: 1.5em;
-  border-bottom: 1px dotted rgba(255, 255, 255, 0.22);
-  transform: translateY(-0.3em) scaleX(0);
-  transform-origin: left;
-  animation: boot-draw 0.26s ease-out calc(var(--d) + 80ms) forwards;
-}
-.boot-ok {
-  color: var(--color-amethyst-soft);
-  opacity: 0;
-  animation: boot-stamp 0.18s ease-out calc(var(--d) + 320ms) forwards;
-}
-.boot-ready {
-  color: #ffffff;
-}
-.boot-caret {
-  width: 0.55em;
-  height: 1.05em;
-  align-self: center;
-  background: var(--color-amethyst);
-  animation: boot-blink 0.9s steps(1) infinite;
-}
-
-/* Fills along the bottom edge in step with the counter. */
-.boot-bar {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 3px;
-  transform-origin: left;
-  transform: scaleX(0);
-  background: linear-gradient(90deg, var(--color-amethyst-deep), var(--color-amethyst), var(--color-amethyst-soft));
-  animation: boot-fill 2.4s cubic-bezier(0.45, 0.05, 0.35, 1) forwards;
-}
-
-/* ── Act 2: the name ─────────────────────────────── */
-.boot-name {
-  animation: boot-out 0.25s ease-in 3.45s forwards;
-}
-.boot-name-line {
-  display: flex;
-  overflow: hidden;
-  padding-bottom: 0.12em;
-  white-space: nowrap;
-  font-size: clamp(2.1rem, 9vw, 8rem);
-  color: #ffffff;
-}
-.boot-name-line span {
-  display: inline-block;
-  transform: translateY(110%);
-  animation: boot-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) calc(2600ms + var(--i) * 45ms) forwards;
-}
-.boot-name-sub {
-  opacity: 0;
-  animation: boot-appear 0.45s ease-out 3.05s forwards;
-}
-
-/* ── Act 3: the seam ─────────────────────────────── */
-.boot-seam {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 2px;
-  margin-top: -1px;
-  background: linear-gradient(90deg, transparent, var(--color-amethyst), var(--color-amethyst-soft), var(--color-amethyst), transparent);
-  box-shadow: 0 0 24px 4px rgba(139, 92, 246, 0.55);
-  transform: scaleX(0);
-  animation:
-    boot-seam 0.32s cubic-bezier(0.65, 0, 0.35, 1) 3.45s forwards,
-    boot-out 0.4s ease-out 3.85s forwards;
-}
-
-/* Repeat visits and reduced motion: a short fade, no sequence. */
-.boot-fade {
-  opacity: 0;
-  transition: opacity 0.38s ease-out;
-}
-
-@keyframes boot-count { to { --boot-n: 100; } }
-@keyframes boot-fill { to { transform: scaleX(1); } }
-@keyframes boot-line { to { opacity: 1; transform: translateY(0); } }
-@keyframes boot-draw { to { transform: translateY(-0.3em) scaleX(1); } }
-@keyframes boot-seam { to { transform: scaleX(1); } }
-@keyframes boot-stamp { from { opacity: 0; transform: scale(1.4); } to { opacity: 1; transform: scale(1); } }
-@keyframes boot-blink { 50% { opacity: 0; } }
-@keyframes boot-lift { to { opacity: 0; transform: translateY(-28px); } }
-@keyframes boot-rise { to { transform: translateY(0); } }
-@keyframes boot-appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes boot-out { to { opacity: 0; } }
-@keyframes boot-split-up { to { transform: translateY(-100%); } }
-@keyframes boot-split-down { to { transform: translateY(100%); } }
-@keyframes boot-failsafe { to { visibility: hidden; } }
-
-/* Underline that draws in from the leading edge on hover. */
-.pull-link {
-  position: relative;
-}
-
-.pull-link::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -0.15em;
-  height: 1px;
-  width: 100%;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.pull-link:hover::after,
-.pull-link:focus-visible::after {
-  transform: scaleX(1);
-}
-
-/* The WebGL field lies under every section, which is why grounds are translucent. */
-.scroll-field {
+.grain {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 60;
   pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Buttons and links that act on the reader's behalf. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 999px;
+  padding: 0.85rem 1.4rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+.btn-solid {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.btn-solid:hover {
+  background: var(--color-amber);
+}
+.btn-ghost {
+  border: 1px solid var(--color-line);
+  color: var(--color-paper);
+}
+.btn-ghost:hover {
+  border-color: var(--color-amber);
+  color: var(--color-amber);
+}
+.btn:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 3px;
+}
+
+/*
+ * The headline box shared by the opening and the hero. Both use these two
+ * classes so the name lands in exactly the same place when the loader
+ * dissolves into the page.
+ */
+/*
+ * The name is anchored from the top, not centred: the opening's box holds the
+ * name and one line, the hero's holds the name and its supporting copy, and
+ * centring would land the name at two different heights across the hand-off.
+ */
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-inline: 1.25rem;
+  /* Phones: the monolith stands centre-frame, so the name sits beneath it. */
+  padding-top: 46svh;
+}
+@media (min-width: 640px) {
+  .hero-copy {
+    padding-inline: 2.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .hero-copy {
+    padding-inline: 6vw;
+    padding-top: 24svh;
+  }
+}
+.hero-name {
+  font-size: calc(clamp(3.5rem, 10vw, 9.5rem) * var(--ds));
+  /* One word per line in every typeface, so the opening's name and the
+     hero's always break identically (a ch-based width broke differently in
+     wide faces and showed through the reveal). */
+  width: min-content;
+}
+
+/*
+ * The opening. CSS from first paint: a blade of amber light sweeps across the
+ * name and reveals it behind itself (0.7–2.0 s), the role line follows. The
+ * component only adds `loader-out` to fade the whole overlay away.
+ */
+.loader {
+  animation: loader-failsafe 0.01s linear 6s forwards;
+}
+/*
+ * The reveal: the seam opens. Two registered percentages mark the gap's left
+ * and right edges; they start together at the seam and travel off-screen in
+ * opposite directions. The stage is masked by them (opaque outside the gap,
+ * transparent inside) and the two beams sit on the edges. Registered so the
+ * browser interpolates them; `inherits` so the stage and beams read them.
+ */
+@property --gl {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 85%;
+}
+@property --gr {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 85%;
+}
+.loader {
+  /* Where the monolith's seam sits on screen. On phones the footage is
+     anchored further left, so the seam lands nearer the middle. */
+  --seam: 62%;
+  --gl: var(--seam);
+  --gr: var(--seam);
+}
+@media (min-width: 1024px) {
+  .loader {
+    --seam: 85%;
+  }
+}
+.loader-out {
+  animation:
+    loader-failsafe 0.01s linear 6s forwards,
+    beam-open 1s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+.loader-out .loader-stage {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--gl) - 1.5%), transparent var(--gl), transparent var(--gr), #000 calc(var(--gr) + 1.5%));
+  mask-image: linear-gradient(90deg, #000 calc(var(--gl) - 1.5%), transparent var(--gl), transparent var(--gr), #000 calc(var(--gr) + 1.5%));
+}
+.loader-beam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  opacity: 0;
+  background: #fff4e6;
+  box-shadow: 0 0 22px 6px rgba(226, 176, 124, 0.85), 0 0 80px 18px rgba(226, 176, 124, 0.35);
+  pointer-events: none;
+}
+.loader-beam-l {
+  left: var(--gl);
+}
+.loader-beam-r {
+  left: var(--gr);
+}
+.loader-out .loader-beam {
+  animation: beam-glow 1s ease-out forwards;
+}
+/* Repeat visits and reduced motion: a short fade, no reveal. */
+.loader-quick.loader-out {
+  animation: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.loader-quick.loader-out .loader-stage {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.loader-quick .loader-beam {
+  display: none;
+}
+
+@keyframes beam-open {
+  to {
+    --gl: -4%;
+    --gr: 104%;
+  }
+}
+@keyframes beam-glow {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.loader-name {
+  position: relative;
+  /* Exactly as wide as the longest word, so the blade ends where the name does. */
+  width: min-content;
+  clip-path: inset(-15% 100% -15% 0);
+  animation: name-sweep 1.3s cubic-bezier(0.65, 0, 0.35, 1) 0.7s forwards;
+}
+.loader-blade {
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  left: 0;
+  width: 3px;
+  transform: translateX(-100%);
+  background: var(--color-amber);
+  box-shadow: 0 0 18px 4px rgba(226, 176, 124, 0.7);
+  animation: blade-move 1.3s cubic-bezier(0.65, 0, 0.35, 1) 0.7s forwards;
+}
+.loader-role {
+  opacity: 0;
+  animation: rise-in 0.6s ease-out 1.7s forwards;
+}
+.loader-quick .loader-name,
+.loader-quick .loader-role {
+  animation: none;
+  clip-path: none;
+  opacity: 1;
+}
+.loader-quick .loader-blade {
+  display: none;
+}
+
+/* Hollow display letters for the quieter of two marquee lines. */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-paper);
+}
+
+/* The 3D objects' idle drift; each sets its own duration and delay. */
+.float-y {
+  animation: float-y 6s ease-in-out infinite;
+}
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translate3d(0, -3%, 0) rotate(-2deg);
+  }
+  50% {
+    transform: translate3d(0, 3%, 0) rotate(2deg);
+  }
+}
+
+/* Hero copy that follows the name once the opening hands over. */
+.hero-follow > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero-follow.is-ready > * {
+  opacity: 1;
+  transform: none;
+}
+.hero-follow.is-ready > :nth-child(2) {
+  transition-delay: 0.12s;
+}
+.hero-follow.is-ready > :nth-child(3) {
+  transition-delay: 0.24s;
+}
+
+@keyframes name-sweep {
+  to {
+    clip-path: inset(-15% 0 -15% 0);
+  }
+}
+@keyframes blade-move {
+  80% {
+    opacity: 1;
+  }
+  to {
+    left: 100%;
+    opacity: 0;
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes loader-failsafe {
+  to {
+    visibility: hidden;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
