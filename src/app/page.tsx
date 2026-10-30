@@ -20,7 +20,7 @@ export default function Page() {
       <Hero />
       <KineticBand />
       <Capabilities />
-      <ScrubVideo id="work-intro" src="/media/transition.mp4">
+      <ScrubVideo id="work-intro" src="/media/transition.mp4" frames={{ dir: "/media/transition-frames", count: 73 }}>
         <h2 className="display text-center text-[calc(clamp(3rem,9vw,8rem)*var(--ds))]">Selected work</h2>
       </ScrubVideo>
       <ProjectDeck cases={caseStudies} works={frontendWork} readora={readora} />
