@@ -24,7 +24,7 @@ export default function Nav() {
           <a href={profile.resume} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-amber">
             Résumé ↗
           </a>
-          <a href="#contact" className="rounded-full border border-line px-4 py-2 transition-colors hover:border-amber hover:text-amber">
+          <a href={profile.whatsapp} target="_blank" rel="noopener noreferrer" className="rounded-full border border-line px-4 py-2 transition-colors hover:border-amber hover:text-amber">
             Contact
           </a>
         </div>

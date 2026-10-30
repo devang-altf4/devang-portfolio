@@ -16,6 +16,7 @@ export const profile = {
   emailHref: `mailto:maybedevang29@gmail.com?subject=${encodeURIComponent("Hello from devangbuilds.me")}`,
   linkedin: "https://www.linkedin.com/in/devang-gupta-267475343/",
   github: "https://github.com/devang-altf4",
+  whatsapp: `https://wa.me/918369743238?text=${encodeURIComponent("Hi Devang, I came across your portfolio.")}`,
   resume: "https://drive.google.com/file/d/1saDTBGs6mRUS7_QibwdvYu_IF5Lq-REe/view?usp=sharing",
   site: "https://devangbuilds.me",
 } as const;
